@@ -49,3 +49,5 @@ uCommerce.crunchsolution.cache
 uCommerce.executiontimes.cache
 src/.idea/*
 tools/LiveSync-*
+.idea/
+.vscode/
