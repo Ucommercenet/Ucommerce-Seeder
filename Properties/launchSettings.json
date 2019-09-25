@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Ucommerce.Faker": {
+      "commandName": "Project",
+      "commandLineArgs": "-c:\"Data Source=.;Initial Catalog=u_umbraco810;Integrated Security=True\" -s:medium"
+    }
+  }
+}

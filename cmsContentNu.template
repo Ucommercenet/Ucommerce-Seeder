@@ -1,0 +1,41 @@
+{
+  "properties": {
+    "umbracoFile": [
+      {
+        "culture": "",
+        "seg": "",
+        "val": "{\r\n  \"crops\": null,\r\n  \"focalPoint\": {\r\n    \"left\": 0.5,\r\n    \"top\": 0.5\r\n  },\r\n  \"src\": \"<mediaPath>\"\r\n}"
+      }
+    ],
+    "umbracoWidth": [
+      {
+        "culture": "",
+        "seg": "",
+        "val": 1080
+      }
+    ],
+    "umbracoHeight": [
+      {
+        "culture": "",
+        "seg": "",
+        "val": 1080
+      }
+    ],
+    "umbracoBytes": [
+      {
+        "culture": "",
+        "seg": "",
+        "val": "10000"
+      }
+    ],
+    "umbracoExtension": [
+      {
+        "culture": "",
+        "seg": "",
+        "val": "jpg"
+      }
+    ]
+  },
+  "cultureData": {},
+  "urlSegment": "endless"
+}

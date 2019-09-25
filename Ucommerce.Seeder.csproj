@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
+        <AssemblyName>uceed</AssemblyName>
+        <LangVersion>7.3</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Bogus" Version="28.2.1" />
+      <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.6">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0-preview9.19423.4" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
+      <PackageReference Include="System.Data.Common" Version="4.3.0" />
+      <PackageReference Include="System.Data.SqlClient" Version="4.6.1" />
+      <PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="2.6.18" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="sample_image_list.txt" />
+      <Content Include="sample_image_list.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="cmsContentNu.template" />
+      <Content Include="cmsContentNu.template">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="propertyData.template" />
+      <Content Include="propertyData.template">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="media" />
+    </ItemGroup>
+</Project>
