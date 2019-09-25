@@ -1,0 +1,15 @@
+set -e	
+
+docker build .
+docker-compose up --no-start
+docker-compose start mssql
+docker-compose run mssqltools /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; IF DB_ID('umbraco810') IS NOT NULL EXEC sp_detach_db @dbname = N'umbraco810';"
+docker-compose exec mssql cp -f umbraco810_blank.mdf umbraco810_seeding.mdf
+docker-compose exec mssql cp -f umbraco810_blank.ldf umbraco810_seeding.ldf
+docker-compose run mssqltools /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; CREATE DATABASE umbraco810 ON (FILENAME = '/var/opt/mssql/data/umbraco810_seeding.mdf'), (FILENAME = '/var/opt/mssql/data/umbraco810_seeding.ldf') FOR ATTACH;"
+docker-compose run dotnetcore bash -c "dotnet run -p Ucommerce.Seeder.csproj -- -s:medium -c:\"server=mssql;database=umbraco810;user id=sa;password=Pass@Word1\""
+docker-compose run mssqltools /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; IF DB_ID('umbraco810') IS NOT NULL EXEC sp_detach_db @dbname = N'umbraco810';"
+docker-compose exec mssql mv -f /var/opt/mssql/data/umbraco810_seeding.mdf /etc/seeder/db/umbraco810_done.mdf
+docker-compose exec mssql mv -f /var/opt/mssql/data/umbraco810_seeding.ldf /etc/seeder/db/umbraco810_done.ldf
+
+echo "Your finished db: db/umbraco810_done.mdf"

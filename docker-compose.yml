@@ -1,0 +1,26 @@
+version: '3.2'
+services:
+  mssql:
+    build: .
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_PID: Developer
+      SA_PASSWORD: Pass@Word1
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./db:/etc/seeder/db
+
+  mssqltools:
+    image: mcr.microsoft.com/mssql-tools
+    links:
+      - mssql
+
+  dotnetcore:
+    image: mcr.microsoft.com/dotnet/core/sdk:2.2
+    links:
+      - mssql
+    volumes:
+      - .:/etc/ucommerce-seeder
+    working_dir: /etc/ucommerce-seeder
+
