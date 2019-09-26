@@ -9,6 +9,90 @@ Ever tried implementing a webshop on a database with two products in it? It perf
 On the other hand, if you build your shop against a large Ucommerce database, chances are higher that you'll end up with a shop that scales a lot better.
 
 
+
+## Seeding a brand new database using docker
+
+1. install docker and docker-compose
+
+2. `./seed`
+
+```
+Sending build context to Docker daemon  223.5MB
+Step 1/9 : FROM mcr.microsoft.com/mssql/server
+ ---> 885d07287041
+Step 2/9 : ADD db /var/db/
+ ---> Using cache
+ ---> ab39544581f8
+Step 3/9 : COPY db/* /var/opt/mssql/data/
+ ---> Using cache
+ ---> 866f2b985246
+Step 4/9 : ENV SA_PASSWORD=Pass@Word1
+ ---> Using cache
+ ---> 5480a36c01fc
+Step 5/9 : WORKDIR /var/opt/mssql/data/
+ ---> Using cache
+ ---> 55fac9af362c
+Step 6/9 : RUN cp -f umbraco810_blank.mdf umbraco810_seeding.mdf
+ ---> Using cache
+ ---> 591e4c4f64af
+Step 7/9 : RUN cp -f umbraco810_blank.ldf umbraco810_seeding.ldf
+ ---> Using cache
+ ---> 3b972f9aea91
+Step 8/9 : EXPOSE 1433
+ ---> Using cache
+ ---> f82959dd755a
+Step 9/9 : CMD [ "/opt/mssql/bin/sqlservr" ]
+ ---> Using cache
+ ---> e05cb09bdb61
+Successfully built e05cb09bdb61
+ucommerce-seeder_mssql_1 is up-to-date
+Starting mssql ... done
+Starting ucommerce-seeder_mssql_1 ... done
+Changed database context to 'master'.
+Starting ucommerce-seeder_mssql_1 ... done
+Changed database context to 'master'.
+Starting ucommerce-seeder_mssql_1 ... done
+Generating 10 media folders with 100 images in each. 3 secs
+Generating 10 definitions. 0 secs
+Generating 50 definition fields. 0 secs
+Generating descriptions for 50 definition fields. 0 secs
+Generating 5 data types.0 secs
+Generating properties for 5 data types.0 secs
+Generating 4 languages. 1 secs
+Generating 10 currencies. 0 secs
+Generating 50 price groups. 0 secs
+Generating 3 product relation types. 0 secs
+Generating 5 product definitions. 0 secs
+Generating 25 product definition fields. 0 secs
+Generating descriptions for 25 product definition fields. 0 secs
+Generating 10 stores. 0 secs
+Generating properties for 10 stores. 0 secs
+Generating 100 catalogs. 0 secs
+Generating descriptions for 100 catalogs. 0 secs
+Generating properties for 100 catalogs...0 secs
+Generating allowed price groups for 100 catalogs. 0 secs
+Generating 1,000 top level categories. 0 secs
+Generating 4,000 subcategories. 1 secs
+Generating 24,980 descriptions for 4,996 categories. 2 secs
+Generating ~4,996 properties for 4,996 categories. 3 secs
+Generating 1,000 products. 0 secs
+Generating 5,000 descriptions for 1,000 products with  5 languages. 1 secs
+Generating ~0 language variant properties with values for 1,000 products. 0 secs
+Generating ~0 language invariant properties with values for 1,000 products. 0 secs
+Generating 150,000 prices in batches of 100,000. 14 secs
+Generating 25,000 relations for 1,000 products. 1 secs
+Generating 5,000 variants. 1 secs
+```
+
+Your fininshed db will be in the `db` folder by the name `umbraco810_done.mdf|ldf`.
+You can attach this database using SQL management studio or T-SQL.
+
+`seed` takes one argument, the db size: `medium`, `large` or `huge`
+
+For example: `./seed large` will generate a "large" database.
+
+## Seeding an existing database
+
 ## Limitations
 
 1. For now, this tool only works with Umbraco 8 and Ucommerce 8. It has a hard dependency on the table structure of both. 
