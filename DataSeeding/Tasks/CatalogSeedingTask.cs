@@ -54,15 +54,21 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             Console.Write($"Generating allowed price groups for {Count:N0} catalogs. ");
             using (var p = new ProgressBar())
             {
-                var allowedPriceGroups = catalogs.SelectMany(catalog =>
+                uint batchSize = 100_000;
+                uint numberOfBatches = 1 + (uint) catalogs.Length * (uint) priceGroupIds.Length / batchSize;
+                var allowedPriceGroupBatches = catalogs.SelectMany(catalog =>
                     priceGroupIds.Select(priceGroupId =>
                         _faker.Random.Bool()
                             ? new UCommerceProductCatalogPriceGroupRelation
                                 {PriceGroupId = priceGroupId, ProductCatalogId = catalog.ProductCatalogId}
                             : null
-                    ).Compact());
-                p.Report(0.5);
-                await context.BulkInsertAsync(allowedPriceGroups, options => options.AutoMapOutputDirection = false);
+                    )
+                        .Compact()).Batch(batchSize);
+                await allowedPriceGroupBatches.EachWithIndexAsync(async (allowedPriceGroups, index) =>
+                {
+                    await context.BulkInsertAsync(allowedPriceGroups, options => options.AutoMapOutputDirection = false);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
             }
         }
 
@@ -98,18 +104,23 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         private async Task GenerateDescriptions(UmbracoDbContext context, UCommerceProductCatalog[] catalogs,
             string[] languageCodes)
         {
-            Console.Write($"Generating descriptions for {Count:N0} catalogs. ");
+            Console.Write($"Generating {(catalogs.Length * languageCodes.Length):N0} descriptions for {Count:N0} catalogs. ");
             using (var p = new ProgressBar())
             {
-                var descriptions = catalogs.SelectMany(catalog =>
+                uint batchSize = 100_000;
+                uint numberOfBatches = (uint) (catalogs.Length * languageCodes.Length) / batchSize;
+                var descriptionBatches = catalogs.SelectMany(catalog =>
                     languageCodes.Select(language => _descriptionFaker
                         .RuleFor(x => x.CultureCode, f => language)
                         .RuleFor(x => x.ProductCatalogId, f => catalog.ProductCatalogId)
                         .Generate()
-                    )).ToArray();
+                    )).Batch(batchSize);
 
-                p.Report(0.5);
-                await context.BulkInsertAsync(descriptions, options => options.AutoMapOutputDirection = false);
+                await descriptionBatches.EachWithIndexAsync(async (descriptions, index) =>
+                {
+                    await context.BulkInsertAsync(descriptions, options => options.AutoMapOutputDirection = false);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
             }
         }
 

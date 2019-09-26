@@ -49,17 +49,22 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 var contentIds = GetAllContentIds(context);
                 var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
                 var definitionFields = LookupDefinitionFields(context, definitionIds);
-                p.Report(0.1);
 
-                UCommerceEntityProperty[] properties = stores
+                uint batchSize = 100_000;
+                uint numberOfBatches = 1 + (uint) stores.Length * (uint) definitionFields.Average(x => x.Count()) / batchSize;
+
+                var propertyBatches = stores
                     .Where(store => store.DefinitionId.HasValue)
                     .SelectMany(store => definitionFields[store.DefinitionId.Value].SelectMany(field =>
                         AddEntityProperty(store.Guid, field.Field, languageCodes, mediaIds,
                             contentIds, field.Editor, field.Enums)))
-                    .ToArray();
+                    .Batch(batchSize);
 
-                p.Report(0.5);
-                await context.BulkInsertAsync(properties, options => options.AutoMapOutputDirection = false);
+                await propertyBatches.EachWithIndexAsync(async (properties, index) =>
+                {
+                    await context.BulkInsertAsync(properties, options => options.AutoMapOutputDirection = false);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
             }
         }
 

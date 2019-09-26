@@ -49,7 +49,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             {
                 var variants =
                     GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
-                        Count);
+                        Count).ToArray();
 
                 p.Report(0.33);
                 foreach (var variant in variants)

@@ -105,7 +105,10 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 $"Generating {_databaseSize.ProductRelationsPerProduct * Count:N0} relations for {Count:N0} {EntityNamePlural}. ");
             using (var p = new ProgressBar())
             {
-                var relations = products.SelectMany(product => Enumerable.Range(1,
+                uint batchSize = 100_000;
+                uint numberOfBatches = 1 + _databaseSize.ProductRelationsPerProduct * Count / batchSize;
+                
+                var relationBatches = products.SelectMany(product => Enumerable.Range(1,
                         (int) _databaseSize.ProductRelationsPerProduct).Select(i =>
                     {
                         var otherProduct = _faker.PickRandom(products);
@@ -119,10 +122,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     }))
                     .Compact()
                     .DistinctBy(a => a.UniqueIndex())
-                    .ToArray();
+                    .Batch(batchSize);
 
-                p.Report(0.5);
-                await context.BulkInsertAsync(relations, options => options.AutoMapOutputDirection = false);
+                await relationBatches.EachWithIndexAsync(async (relations, index) =>
+                {
+                    await context.BulkInsertAsync(relations, options => options.AutoMapOutputDirection = false);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
             }
         }
 
@@ -193,7 +199,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             using (var p = new ProgressBar())
             {
                 uint batchSize = 1_000_000;
-                uint estimatedBatchCount = Count * (uint) languageCodes.Length / batchSize;
+                uint estimatedBatchCount = 1 + Count * (uint) languageCodes.Length / batchSize;
                 var descriptionBatches = products.SelectMany(product =>
                     languageCodes.Select(language => GenerateDescription(product.ProductId, language))
                 ).Batch(batchSize);
@@ -213,7 +219,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         {
             uint averageNumberOfFieldsPerProduct = (uint) productDefinitionFields.Average(f => f.Count()) / 2;
             uint batchSize = 1_000_000;
-            uint estimatedBatchCount = 1 + averageNumberOfFieldsPerProduct / batchSize;
+            uint estimatedBatchCount = 1 + Count * averageNumberOfFieldsPerProduct / batchSize;
 
             Console.Write(
                 $"Generating ~{averageNumberOfFieldsPerProduct * products.Length:N0} language variant properties with values for {products.Length:N0} {EntityNamePlural}. ");
