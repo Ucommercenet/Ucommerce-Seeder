@@ -6,7 +6,7 @@ namespace Ucommerce.Seeder.Models
     {
         public CompositeKey UniqueIndex()
         {
-            return new CompositeKey {Key1 = Name.GetHashCode(), Key2 = ParentCategoryId ?? 0, Key3 = ProductCatalogId};
+            return new CompositeKey {Key1 = Name.GetHashCode(), Key2 = ProductCatalogId};
         }
     }
 }
