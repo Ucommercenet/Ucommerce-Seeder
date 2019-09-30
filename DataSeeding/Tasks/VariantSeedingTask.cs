@@ -59,7 +59,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 }
 
                 p.Report(0.66);
-                await context.BulkInsertAsync(variants);
+                await context.BulkInsertAsync(variants, options => options.BatchSize = 100_000);
                 return variants;
             }
         }

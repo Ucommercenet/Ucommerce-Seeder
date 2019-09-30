@@ -72,7 +72,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     .DistinctBy(a => a.UniqueIndex())
                     .ToArray();
                 p.Report(0.5);
-                await context.BulkInsertAsync(categories);
+                await context.BulkInsertAsync(categories, options => options.BatchSize = 100_000);
                 return categories;
             }
         }
@@ -139,7 +139,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     .DistinctBy(a => a.UniqueIndex())
                     .ToArray();
                 p.Report(0.5);
-                await context.BulkInsertAsync(categories);
+                await context.BulkInsertAsync(categories, options => options.BatchSize = 100_000);
                 return categories;
             }
         }

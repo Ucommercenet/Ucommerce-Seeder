@@ -270,7 +270,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
                         Count);
                 p.Report(0.5);
-                await context.BulkInsertAsync(products);
+                await context.BulkInsertAsync(products, options => options.BatchSize = 100_000);
                 return products;
             }
         }

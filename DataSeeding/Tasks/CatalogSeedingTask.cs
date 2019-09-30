@@ -137,7 +137,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         .ToArray();
 
                 p.Report(0.5);
-                await context.BulkInsertAsync(catalogs);
+                await context.BulkInsertAsync(catalogs, options => options.BatchSize = 100_000);
                 return catalogs;
             }
         }
