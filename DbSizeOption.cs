@@ -4,6 +4,7 @@ namespace Ucommerce.Seeder
     {
         Huge,
         Large,
-        Medium
+        Medium,
+        TinyForTesting
     }
 }

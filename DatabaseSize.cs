@@ -108,5 +108,33 @@ namespace Ucommerce.Seeder
             CmsImagesPerFolder = 100
         };
 
+        public static readonly DatabaseSize TinyForTesting = new DatabaseSize
+        {
+            DataTypes = 1,
+            ProductDefinitions = 1,
+            Definitions = 1,
+            ProductRelationTypes = 1,
+
+            AverageUserDefinedFieldsPerDefinition = 1,
+
+            Languages = 1,
+            Currencies = 1,
+            PriceGroups = 1,
+            TiersPerPriceGroup = 1,
+
+            Products = 3,
+            AverageVariantsPerProduct = 1,
+            ProductRelationsPerProduct = 1,
+
+            Stores = 1,
+            CatalogsPerStore = 1,
+            CategoriesPerCatalog = 5,
+            
+            AverageProductsPerCategory = 2,
+            
+            CmsMediaFolders = 1,
+            CmsImagesPerFolder = 1
+        };
+
     }
 }

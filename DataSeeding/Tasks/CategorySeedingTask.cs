@@ -85,7 +85,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             string[] languageCodes, Guid[] mediaIds)
         {
             var definitionFields = LookupDefinitionFields(context, definitionIds);
-            uint estimatedPropertyCount = (uint) definitionFields.Average(x => x.Count()) * (uint) categories.Length;
+            uint estimatedPropertyCount = definitionFields.Any() ? (uint) definitionFields.Average(x => x.Count()) * (uint) categories.Length : 1;
             uint batchSize = 1_000_000;
             uint numberOfBatches = 1 + estimatedPropertyCount / batchSize;
 

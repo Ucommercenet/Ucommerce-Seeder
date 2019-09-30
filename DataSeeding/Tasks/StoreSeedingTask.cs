@@ -54,7 +54,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 var definitionFields = LookupDefinitionFields(context, definitionIds);
 
                 uint batchSize = 100_000;
-                uint numberOfBatches = 1 + (uint) stores.Length * (uint) definitionFields.Average(x => x.Count()) / batchSize;
+                uint numberOfBatches = definitionFields.Any() ? 1 + (uint) stores.Length * (uint) definitionFields.Average(x => x.Count()) / batchSize : 1;
 
                 var propertyBatches = stores
                     .Where(store => store.DefinitionId.HasValue)

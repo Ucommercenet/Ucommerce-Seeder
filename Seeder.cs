@@ -32,6 +32,9 @@ namespace Ucommerce.Seeder
                 case DbSizeOption.Medium:
                     _dbSize = DatabaseSize.Medium;
                     break;
+                case DbSizeOption.TinyForTesting:
+                    _dbSize = DatabaseSize.TinyForTesting;
+                    break;
                 default:
                     throw new ArgumentException($"Unknown DbSizeOption value {dbSize}");
             }

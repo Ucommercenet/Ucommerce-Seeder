@@ -86,7 +86,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 var contentIds = _cmsContent.GetAllContentIds(context);
                 var definitionFields = LookupDefinitionFields(context, definitionIds);
                 uint batchSize = 100_000;
-                uint numberOfBatches = (uint) (1 + batchSize / definitionFields.Average(x => x.Count()) / catalogs.Length);
+                uint numberOfBatches = definitionFields.Any() ? (uint) (1 + batchSize / definitionFields.Average(x => x.Count()) / catalogs.Length) : 1;
                 
                 var propertiyBatches = catalogs
                     .Where(catalog => catalog.DefinitionId.HasValue)
