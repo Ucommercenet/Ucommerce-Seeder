@@ -13,8 +13,6 @@ namespace Ucommerce.Seeder.DataSeeding
 {
     public abstract class DataSeedingTaskBase : IDataSeedingTask
     {
-        protected readonly Guid UmbracoMediaNodeType = new Guid("B796F64C-1F99-4FFB-B886-4BF4BC011A9C");
-        protected readonly Guid UmbracoContentNodeType = new Guid("C66BA18E-EAF3-4CFF-8A22-41B16D66A972");
 
         private readonly uint _count;
         protected readonly Faker<UCommerceEntityProperty> EntityPropertyFaker;
@@ -35,19 +33,6 @@ namespace Ucommerce.Seeder.DataSeeding
 
         public abstract Task Seed(UmbracoDbContext context);
 
-        protected virtual Guid[] GetAllMediaIds(UmbracoDbContext context)
-        {
-            return context.UmbracoNode
-                .Where(x => x.NodeObjectType == UmbracoMediaNodeType)
-                .Select(x => x.UniqueId).ToArray();
-        }
-
-        protected virtual Guid[] GetAllContentIds(UmbracoDbContext context)
-        {
-            return context.UmbracoNode
-                .Where(x => x.NodeObjectType == UmbracoContentNodeType)
-                .Select(x => x.UniqueId).ToArray();
-        }
 
         protected IEnumerable<UCommerceEntityProperty> AddEntityProperty(Guid entityGuid,
             UCommerceDefinitionField field, string[] languageCodes, Guid[] mediaIds, Guid[] contentIds, string editor,

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
@@ -11,11 +12,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
 {
     public class DataTypeSeedingTask : DataSeedingTaskBase
     {
+        private readonly ICmsContent _cmsContent;
         private readonly Faker<UCommerceDataType> _datatypeFaker;
         private readonly Faker _faker = new Faker();
 
-        public DataTypeSeedingTask(uint count) : base(count)
+        public DataTypeSeedingTask(uint count, ICmsContent cmsContent) : base(count)
         {
+            _cmsContent = cmsContent;
             _datatypeFaker = new Faker<UCommerceDataType>()
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f))
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
@@ -47,8 +50,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
             using (var p = new ProgressBar())
             {
                 var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
-                var mediaIds = GetAllMediaIds(context);
-                var contentIds = GetAllContentIds(context);
+                var mediaIds = _cmsContent.GetAllMediaIds(context);
+                var contentIds = _cmsContent.GetAllContentIds(context);
 
                 UCommerceEntityProperty[] properties = dataTypes
                     .Where(dataType => dataType.DefinitionId.HasValue)

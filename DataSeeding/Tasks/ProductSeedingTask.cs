@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Internal;
 using Remotion.Linq.Parsing.Structure.IntermediateModel;
+using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 using Z.BulkOperations;
@@ -20,6 +21,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
     public class ProductSeedingTask : DataSeedingTaskBase
     {
         protected readonly DatabaseSize _databaseSize;
+        private readonly ICmsContent _cmsContent;
         protected readonly Faker _faker = new Faker();
         protected readonly Faker<UCommerceProduct> _productFaker;
         protected readonly Faker<UCommerceProductRelation> _productRelationFaker;
@@ -29,9 +31,10 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         protected readonly Faker<UCommerceProductDescription> _productDescriptionFaker;
         protected readonly Faker<UCommerceProductDescriptionProperty> _productDescriptionPropertyFaker;
 
-        public ProductSeedingTask(DatabaseSize databaseSize) : base(databaseSize.Products)
+        public ProductSeedingTask(DatabaseSize databaseSize, ICmsContent cmsContent) : base(databaseSize.Products)
         {
             _databaseSize = databaseSize;
+            _cmsContent = cmsContent;
             _productFaker = new Faker<UCommerceProduct>()
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
                 .RuleFor(x => x.Name, f => f.Commerce.ProductName())
@@ -83,8 +86,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
             var productRelationTypeIds =
                 context.UCommerceProductRelationType.Select(prt => prt.ProductRelationTypeId).ToArray();
-            var mediaIds = GetAllMediaIds(context);
-            var contentIds = GetAllMediaIds(context);
+            var mediaIds = _cmsContent.GetAllMediaIds(context);
+            var contentIds = _cmsContent.GetAllMediaIds(context);
 
             var products = await GenerateProducts(context, productDefinitionIds, languageCodes, mediaIds);
 

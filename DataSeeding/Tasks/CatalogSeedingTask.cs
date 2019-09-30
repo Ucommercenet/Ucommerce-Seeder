@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Bogus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -12,12 +13,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 {
     public class CatalogSeedingTask : DataSeedingTaskBase
     {
+        private readonly ICmsContent _cmsContent;
         private readonly Faker<UCommerceProductCatalog> _catalogFaker;
         private readonly Faker<UCommerceProductCatalogDescription> _descriptionFaker;
         private readonly Faker _faker;
 
-        public CatalogSeedingTask(uint count) : base(count)
+        public CatalogSeedingTask(uint count, ICmsContent cmsContent) : base(count)
         {
+            _cmsContent = cmsContent;
             _faker = new Faker();
             _catalogFaker = new Faker<UCommerceProductCatalog>()
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f))
@@ -79,8 +82,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             Console.Write($"Generating properties for {Count:N0} catalogs...");
             using (var p = new ProgressBar())
             {
-                var mediaIds = GetAllMediaIds(context);
-                var contentIds = GetAllContentIds(context);
+                var mediaIds = _cmsContent.GetAllMediaIds(context);
+                var contentIds = _cmsContent.GetAllContentIds(context);
                 var definitionFields = LookupDefinitionFields(context, definitionIds);
                 uint batchSize = 100_000;
                 uint numberOfBatches = (uint) (1 + batchSize / definitionFields.Average(x => x.Count()) / catalogs.Length);

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Ucommerce.Seeder.DataSeeding.Tasks;
+using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
+using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
 namespace Ucommerce.Seeder.DataSeeding
@@ -12,10 +15,12 @@ namespace Ucommerce.Seeder.DataSeeding
     public class DataSeeder
     {
         private readonly DatabaseSize _sizeOptions;
+        private readonly bool _excludeCmsTables;
 
-        public DataSeeder(DatabaseSize sizeOptions)
+        public DataSeeder(DatabaseSize sizeOptions, bool excludeCmsTables)
         {
             _sizeOptions = sizeOptions;
+            _excludeCmsTables = excludeCmsTables;
         }
 
         //
@@ -31,37 +36,44 @@ namespace Ucommerce.Seeder.DataSeeding
             var masterStopwatch = new Stopwatch();
             masterStopwatch.Start();
 
-            var seedingTasks = new List<IDataSeedingTask>
-            {
-                new MediaSeedingTask(_sizeOptions),
-
-                new DefinitionSeedingTask(_sizeOptions.Definitions),
-                new DefinitionFieldSeedingTask(_sizeOptions.Definitions *
-                                               _sizeOptions.AverageUserDefinedFieldsPerDefinition),
-
-                new DataTypeSeedingTask(_sizeOptions.DataTypes),
-                new LanguageSeedingTask(_sizeOptions.Languages),
-                new CurrencySeedingTask(_sizeOptions.Currencies),
-                new PriceGroupSeedingTask(_sizeOptions.PriceGroups),
-                new ProductRelationTypeSeedingTask(_sizeOptions.ProductRelationTypes),
-
-                new ProductDefinitionSeedingTask(_sizeOptions.ProductDefinitions),
-                new ProductDefinitionFieldsSeedingTask(_sizeOptions.AverageUserDefinedFieldsPerDefinition *
-                                                       _sizeOptions.ProductDefinitions),
-
-                new StoreSeedingTask(_sizeOptions.Stores),
-                new CatalogSeedingTask(_sizeOptions.CatalogsPerStore * _sizeOptions.Stores),
-                new CategorySeedingTask(_sizeOptions.Stores * _sizeOptions.CatalogsPerStore *
-                                        _sizeOptions.CategoriesPerCatalog),
-
-                new ProductSeedingTask(_sizeOptions),
-                new VariantSeedingTask(_sizeOptions),
-
-                new ProductCategoryRelationSeedingTask(_sizeOptions),
-            };
-
             using (var context = dbContextFactory())
             {
+                // For now, only Umbraco is supported.
+                // You can disable Umbraco media seeding
+                ICmsContent content = _excludeCmsTables ? new NullContent() as ICmsContent : new UmbracoContentProvider();
+
+                var seedingTasks = new List<IDataSeedingTask>
+                {
+                    new DefinitionSeedingTask(_sizeOptions.Definitions),
+                    new DefinitionFieldSeedingTask(_sizeOptions.Definitions *
+                                                   _sizeOptions.AverageUserDefinedFieldsPerDefinition),
+
+                    new DataTypeSeedingTask(_sizeOptions.DataTypes, content),
+                    new LanguageSeedingTask(_sizeOptions.Languages),
+                    new CurrencySeedingTask(_sizeOptions.Currencies),
+                    new PriceGroupSeedingTask(_sizeOptions.PriceGroups),
+                    new ProductRelationTypeSeedingTask(_sizeOptions.ProductRelationTypes),
+
+                    new ProductDefinitionSeedingTask(_sizeOptions.ProductDefinitions),
+                    new ProductDefinitionFieldsSeedingTask(_sizeOptions.AverageUserDefinedFieldsPerDefinition *
+                                                           _sizeOptions.ProductDefinitions),
+
+                    new StoreSeedingTask(_sizeOptions.Stores, content),
+                    new CatalogSeedingTask(_sizeOptions.CatalogsPerStore * _sizeOptions.Stores, content),
+                    new CategorySeedingTask(_sizeOptions.Stores * _sizeOptions.CatalogsPerStore *
+                                            _sizeOptions.CategoriesPerCatalog, content),
+
+                    new ProductSeedingTask(_sizeOptions, content),
+                    new VariantSeedingTask(_sizeOptions, content),
+
+                    new ProductCategoryRelationSeedingTask(_sizeOptions),
+                };
+
+                if (!_excludeCmsTables)
+                {
+                    seedingTasks.Insert(0, new UmbracoMediaSeedingTask(_sizeOptions));
+                }
+
                 foreach (var task in seedingTasks)
                 {
                     await task.Seed(context);

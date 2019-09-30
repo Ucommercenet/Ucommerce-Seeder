@@ -12,12 +12,14 @@ namespace Ucommerce.Seeder
     {
         private readonly string _connectionString;
         private readonly bool _verbose;
+        private readonly bool _excludeCmsTables;
         private readonly DatabaseSize _dbSize;
 
-        public Seeder(string connectionString, DbSizeOption dbSize, bool verbose)
+        public Seeder(string connectionString, DbSizeOption dbSize, bool verbose, bool excludeCmsTables)
         {
             _connectionString = connectionString;
             _verbose = verbose;
+            _excludeCmsTables = excludeCmsTables;
 
             switch (dbSize)
             {
@@ -45,7 +47,7 @@ namespace Ucommerce.Seeder
 
         public async Task<int> Run()
         {
-            var seeder = new DataSeeder(_dbSize);
+            var seeder = new DataSeeder(_dbSize, _excludeCmsTables);
 
             await seeder.Seed(() =>
             {

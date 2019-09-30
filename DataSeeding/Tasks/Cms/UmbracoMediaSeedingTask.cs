@@ -4,13 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
-using Microsoft.EntityFrameworkCore;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
-namespace Ucommerce.Seeder.DataSeeding.Tasks
+namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
 {
-    public class MediaSeedingTask : DataSeedingTaskBase
+    public class UmbracoMediaSeedingTask : DataSeedingTaskBase
     {
         private readonly DatabaseSize _sizeOptions;
         private readonly Faker<UmbracoNode> _folderNodeFaker;
@@ -20,7 +19,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         private const int mediaFolderType = 1031;
         private const int mediaType = 1032;
 
-        public MediaSeedingTask(DatabaseSize sizeOptions) : base(
+        public UmbracoMediaSeedingTask(DatabaseSize sizeOptions) : base(
             sizeOptions.CmsMediaFolders * sizeOptions.CmsImagesPerFolder)
         {
             _faker = new Faker();
@@ -32,7 +31,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.UniqueId, f => f.Random.Guid())
                 .RuleFor(x => x.SortOrder, f => 0)
                 .RuleFor(x => x.NodeUser, f => -1)
-                .RuleFor(x => x.NodeObjectType, f => UmbracoMediaNodeType)
+                .RuleFor(x => x.NodeObjectType, f => UmbracoContentProvider.UmbracoMediaNodeType)
                 .RuleFor(x => x.Text, f => f.Name.JobArea());
 
             _imageNodeFaker = new Faker<UmbracoNode>()
@@ -40,7 +39,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.UniqueId, f => f.Random.Guid())
                 .RuleFor(x => x.SortOrder, f => 0)
                 .RuleFor(x => x.NodeUser, f => -1)
-                .RuleFor(x => x.NodeObjectType, f => UmbracoMediaNodeType)
+                .RuleFor(x => x.NodeObjectType, f => UmbracoContentProvider.UmbracoMediaNodeType)
                 .RuleFor(x => x.Text, f => f.Name.JobArea());
         }
 

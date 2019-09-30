@@ -21,6 +21,10 @@ namespace Ucommerce.Seeder
                 app.Option<bool>("-v|--verbose", 
                     "Verbose output", CommandOptionType.NoValue);
 
+            CommandOption<bool> noCmsArgument = 
+                app.Option<bool>("-n|--no-cms", 
+                    "Exclude CMS specific tables (Umbraco)", CommandOptionType.NoValue);
+
             app.OnExecute(async () =>
             {
                 var connectionString = connectionStringArgument.Value();
@@ -32,7 +36,7 @@ namespace Ucommerce.Seeder
                 }
                 
                 DbSizeOption dbSize = sizeArgument.HasValue() ? sizeArgument.ParsedValue : DbSizeOption.Huge;
-                int result = await new Seeder(connectionString, dbSize, verboseArgument.HasValue()).Run();
+                int result = await new Seeder(connectionString, dbSize, verboseArgument.HasValue(), noCmsArgument.HasValue()).Run();
                 return result;
             });
 

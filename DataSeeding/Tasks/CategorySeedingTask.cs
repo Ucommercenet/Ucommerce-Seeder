@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Bogus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -13,13 +14,15 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 {
     public class CategorySeedingTask : DataSeedingTaskBase
     {
+        private readonly ICmsContent _cmsContent;
         private readonly Faker<UCommerceCategory> _categoryFaker;
         private readonly Faker<UCommerceCategoryProperty> _categoryPropertyFaker;
         private readonly Faker<UCommerceCategoryDescription> _descriptionFaker;
         private readonly Faker _faker;
 
-        public CategorySeedingTask(uint count) : base(count)
+        public CategorySeedingTask(uint count, ICmsContent cmsContent) : base(count)
         {
+            _cmsContent = cmsContent;
             _faker = new Faker();
             _categoryFaker = new Faker<UCommerceCategory>()
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f))
@@ -47,7 +50,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.Category).Select(c => c.DefinitionId)
                 .ToArray();
             var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
-            var mediaIds = GetAllMediaIds(context);
+            var mediaIds = _cmsContent.GetAllMediaIds(context);
 
             var topLevelCategories = await GenerateCategories(context, definitionIds, catalogIds, mediaIds);
 
@@ -89,7 +92,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             Console.Write($"Generating ~{estimatedPropertyCount:N0} properties for {categories.Length:N0} categories. ");
             using (var p = new ProgressBar())
             {
-                var contentIds = GetAllContentIds(context);
+                var contentIds = _cmsContent.GetAllContentIds(context);
 
                 var propertyBatches = categories.SelectMany(category =>
                         definitionFields[category.DefinitionId].SelectMany(field =>

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
@@ -8,8 +9,11 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 {
     public class VariantSeedingTask : ProductSeedingTask
     {
-        public VariantSeedingTask(DatabaseSize databaseSize) : base(databaseSize)
+        private readonly ICmsContent _cmsContent;
+
+        public VariantSeedingTask(DatabaseSize databaseSize, ICmsContent cmsContent) : base(databaseSize, cmsContent)
         {
+            _cmsContent = cmsContent;
         }
 
         protected override string EntityNamePlural
@@ -29,8 +33,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var productDefinitionFields = LookupProductDefinitionFields(context, true);
             var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
             var productIds = context.UCommerceProduct.Select(product => product.ProductId).ToArray();
-            var mediaIds = GetAllMediaIds(context);
-            var contentIds = GetAllMediaIds(context);
+            var mediaIds = _cmsContent.GetAllMediaIds(context);
+            var contentIds = _cmsContent.GetAllMediaIds(context);
 
             var products = await GenerateVariants(context, productDefinitionIds, languageCodes, productIds, mediaIds);
 

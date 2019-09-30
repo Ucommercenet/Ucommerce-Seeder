@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -12,10 +13,12 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 {
     public class StoreSeedingTask : DataSeedingTaskBase
     {
+        private readonly ICmsContent _cmsContent;
         private readonly Faker<UCommerceProductCatalogGroup> _storeFaker;
 
-        public StoreSeedingTask(uint count) : base(count)
+        public StoreSeedingTask(uint count, ICmsContent cmsContent) : base(count)
         {
+            _cmsContent = cmsContent;
             _storeFaker = new Faker<UCommerceProductCatalogGroup>()
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f))
                 .RuleFor(x => x.Description, f => f.Lorem.Text())
@@ -45,8 +48,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             Console.Write($"Generating properties for {Count:N0} stores. ");
             using (var p = new ProgressBar())
             {
-                var mediaIds = GetAllMediaIds(context);
-                var contentIds = GetAllContentIds(context);
+                var mediaIds = _cmsContent.GetAllMediaIds(context);
+                var contentIds = _cmsContent.GetAllContentIds(context);
                 var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
                 var definitionFields = LookupDefinitionFields(context, definitionIds);
 
