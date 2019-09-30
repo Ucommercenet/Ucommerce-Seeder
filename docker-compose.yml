@@ -16,6 +16,6 @@ services:
     links:
       - mssql
     volumes:
-      - .:/etc/ucommerce-seeder
+      - ./src:/etc/ucommerce-seeder
     working_dir: /etc/ucommerce-seeder
 

@@ -110,7 +110,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             {
                 uint batchSize = 100_000;
                 uint numberOfBatches = 1 + _databaseSize.ProductRelationsPerProduct * Count / batchSize;
-                
+
                 var relationBatches = products.SelectMany(product => Enumerable.Range(1,
                         (int) _databaseSize.ProductRelationsPerProduct).Select(i =>
                     {
@@ -158,7 +158,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         priceGroupIds.SelectMany(priceGroupId =>
                             Enumerable.Range(1, (int) _databaseSize.TiersPerPriceGroup)
                                 .Select(i => new
-                                    {Product = product, Tier = i })
+                                    {Product = product, Tier = i})
                         )
                     ).Batch(batchSize);
 
@@ -168,10 +168,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 {
                     var prices = batch.prices.ToArray();
                     await context.BulkInsertAsync(prices,
-                        options =>
-                        {
-                            options.AutoMapOutputDirection = true;
-                        });
+                        options => { options.AutoMapOutputDirection = true; });
 
                     p.Report(1.0 * ++batchCount / numBatches);
 
@@ -186,7 +183,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                             options.AutoMapOutputDirection = false;
                             // Specifying the columns to insert is necessary for this table only.
                             // The reason is unknown, but if you omit it, MinimumQuantity will always be '1'.
-                            options.ColumnInputExpression = x => new { x.MinimumQuantity, x.Guid, x.ProductId, x.PriceId };
+                            options.ColumnInputExpression =
+                                x => new {x.MinimumQuantity, x.Guid, x.ProductId, x.PriceId};
                         });
 
                     p.Report(1.0 * ++batchCount / numBatches);
@@ -220,7 +218,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             ILookup<int, ProductDefinitionFieldEditorAndEnum> productDefinitionFields, Guid[] mediaIds,
             Guid[] contentIds)
         {
-            uint averageNumberOfFieldsPerProduct = (uint) productDefinitionFields.Average(f => f.Count()) / 2;
+            uint averageNumberOfFieldsPerProduct = productDefinitionFields.Any()
+                ? (uint) productDefinitionFields.Average(f => f.Count()) / 2
+                : 1;
             uint batchSize = 1_000_000;
             uint estimatedBatchCount = 1 + Count * averageNumberOfFieldsPerProduct / batchSize;
 
@@ -371,6 +371,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.ProductId, f => productId)
                 .Generate();
         }
-
     }
 }
