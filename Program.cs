@@ -21,10 +21,6 @@ namespace Ucommerce.Seeder
                 app.Option<bool>("-v|--verbose", 
                     "Verbose output", CommandOptionType.NoValue);
 
-            CommandOption<bool> truncateArgument = 
-                app.Option<bool>("-t|--truncate", 
-                    "Truncate database", CommandOptionType.NoValue);
-
             app.OnExecute(async () =>
             {
                 var connectionString = connectionStringArgument.Value();
@@ -36,7 +32,7 @@ namespace Ucommerce.Seeder
                 }
                 
                 DbSizeOption dbSize = sizeArgument.HasValue() ? sizeArgument.ParsedValue : DbSizeOption.Huge;
-                int result = await new Seeder(connectionString, dbSize, verboseArgument.HasValue(), truncateArgument.HasValue()).Run();
+                int result = await new Seeder(connectionString, dbSize, verboseArgument.HasValue()).Run();
                 return result;
             });
 

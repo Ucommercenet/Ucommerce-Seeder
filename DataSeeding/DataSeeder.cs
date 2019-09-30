@@ -12,12 +12,10 @@ namespace Ucommerce.Seeder.DataSeeding
     public class DataSeeder
     {
         private readonly DatabaseSize _sizeOptions;
-        private readonly bool _truncate;
 
-        public DataSeeder(DatabaseSize sizeOptions, bool truncate)
+        public DataSeeder(DatabaseSize sizeOptions)
         {
             _sizeOptions = sizeOptions;
-            _truncate = truncate;
         }
 
         //
@@ -61,21 +59,6 @@ namespace Ucommerce.Seeder.DataSeeding
 
                 new ProductCategoryRelationSeedingTask(_sizeOptions),
             };
-
-            if (_truncate)
-            {
-                Console.WriteLine("Truncating database");
-                using (var context = dbContextFactory())
-                {
-                    context.ChangeTracker.AutoDetectChangesEnabled = false;
-                    foreach (var task in seedingTasks.OfType<IDataTruncationTask>().Reverse())
-                    {
-                        var taskName = task.GetType().Name;
-                        Console.WriteLine($"Truncating using {taskName}...");
-                        await task.Truncate(context);
-                    }
-                }
-            }
 
             using (var context = dbContextFactory())
             {

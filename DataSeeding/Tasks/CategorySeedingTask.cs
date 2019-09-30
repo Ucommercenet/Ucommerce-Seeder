@@ -193,10 +193,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.ParentCategoryId, f => parentCategory.CategoryId)
                 .Generate();
         }
-
-        public override async Task Truncate(UmbracoDbContext context)
-        {
-            await context.Database.ExecuteSqlCommandAsync(new RawSqlString($"TRUNCATE TABLE [Ucommerce_Category]"));
-        }
     }
 }

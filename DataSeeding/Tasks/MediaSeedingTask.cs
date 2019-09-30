@@ -191,10 +191,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .Generate();
         }
 
-        public override async Task Truncate(UmbracoDbContext context)
-        {
-            await context.Database.ExecuteSqlCommandAsync(new RawSqlString(
-                $"TRUNCATE TABLE [UmbracoMediaVersion]; TRUNCATE TABLE [UmbracoContentVersion]; TRUNCATE TABLE [CmsContentNu]; TRUNCATE TABLE [UmbracoContent]; TRUNCATE TABLE [UmbracoNode]; "));
-        }
     }
 }

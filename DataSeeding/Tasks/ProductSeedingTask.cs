@@ -369,25 +369,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .Generate();
         }
 
-        public override Task Truncate(UmbracoDbContext context)
-        {
-            string[] tables =
-            {
-                "TRUNCATE TABLE [Ucommerce_ProductRelation]",
-                "TRUNCATE TABLE [Ucommerce_ProductDescriptionProperty]",
-                "TRUNCATE TABLE [Ucommerce_ProductDescription]",
-                "TRUNCATE TABLE [Ucommerce_ProductProperty]",
-                "TRUNCATE TABLE [Ucommerce_ProductPrice]",
-                "TRUNCATE TABLE [Ucommerce_Price]",
-                "TRUNCATE TABLE [Ucommerce_Product]",
-            };
-
-            foreach (var sql in tables)
-            {
-                context.Database.ExecuteSqlCommand(new RawSqlString(sql));
-            }
-
-            return Task.CompletedTask;
-        }
     }
 }

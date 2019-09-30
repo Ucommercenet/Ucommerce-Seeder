@@ -41,11 +41,6 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
         {
             return _productDefinitionFaker.Generate();
         }
-        
-        public override async Task Truncate(UmbracoDbContext context)
-        {
-            await context.Database.ExecuteSqlCommandAsync(new RawSqlString($"TRUNCATE TABLE [Ucommerce_ProductDefinition]"));
-        }
-
+       
     }
 }

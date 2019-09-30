@@ -11,7 +11,7 @@ using Ucommerce.Seeder.Models;
 
 namespace Ucommerce.Seeder.DataSeeding
 {
-    public abstract class DataSeedingTaskBase : IDataSeedingTask, IDataTruncationTask
+    public abstract class DataSeedingTaskBase : IDataSeedingTask
     {
         protected readonly Guid UmbracoMediaNodeType = new Guid("B796F64C-1F99-4FFB-B886-4BF4BC011A9C");
         protected readonly Guid UmbracoContentNodeType = new Guid("C66BA18E-EAF3-4CFF-8A22-41B16D66A972");
@@ -79,11 +79,6 @@ namespace Ucommerce.Seeder.DataSeeding
             }
         }
         
-        public virtual Task Truncate(UmbracoDbContext context)
-        {
-            return Task.CompletedTask;
-        }
-
         protected ILookup<int, DefinitionFieldEditorAndEnum> LookupDefinitionFields(UmbracoDbContext context, int[] definitionIds)
         {
             return context.UCommerceDefinitionField

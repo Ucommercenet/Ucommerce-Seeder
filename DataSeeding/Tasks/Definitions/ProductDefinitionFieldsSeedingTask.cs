@@ -90,11 +90,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.DataTypeId, f => f.PickRandom(dataTypeIds))
                 .Generate();
         }
-
-        public override async Task Truncate(UmbracoDbContext context)
-        {
-            await context.Database.ExecuteSqlCommandAsync(
-                new RawSqlString($"TRUNCATE TABLE [Ucommerce_ProductDefinitionField]"));
-        }
     }
 }

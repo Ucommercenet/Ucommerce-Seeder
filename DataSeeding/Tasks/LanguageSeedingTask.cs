@@ -58,11 +58,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.LanguageCultureName, f => culture.DisplayName)
                 .Generate();
         }
-        
-        public override async Task Truncate(UmbracoDbContext context)
-        {
-            await context.Database.ExecuteSqlCommandAsync(new RawSqlString($"TRUNCATE TABLE [Umbraco_Language]"));
-        }
-
     }
 }
