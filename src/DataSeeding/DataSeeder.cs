@@ -72,7 +72,6 @@ namespace Ucommerce.Seeder.DataSeeding
                 {
                     seedingTasks.Insert(0, new UmbracoMediaSeedingTask(_sizeOptions));
                     seedingTasks.Insert(1, new LanguageSeedingTask(_sizeOptions.Languages));
-
                 }
 
                 foreach (var task in seedingTasks)
