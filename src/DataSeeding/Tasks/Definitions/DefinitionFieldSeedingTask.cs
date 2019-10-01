@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bogus;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
@@ -11,11 +12,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
 {
     public class DefinitionFieldSeedingTask : DataSeedingTaskBase
     {
+        private readonly ICmsContent _cmsContent;
         private readonly Faker<UCommerceDefinitionField> _definitionFieldFaker;
         private readonly Faker<UCommerceDefinitionFieldDescription> _definitionFieldDescriptionFaker;
 
-        public DefinitionFieldSeedingTask(uint count) : base(count)
+        public DefinitionFieldSeedingTask(uint count, ICmsContent cmsContent) : base(count)
         {
+            _cmsContent = cmsContent;
             _definitionFieldFaker = new Faker<UCommerceDefinitionField>()
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f))
@@ -48,7 +51,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
             Console.Write($"Generating descriptions for {Count:N0} definition fields. ");
             using (var p = new ProgressBar())
             {
-                var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
+                var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
                 var descriptions = fields.SelectMany(field =>
                     languageCodes.Select(language =>
                         _definitionFieldDescriptionFaker

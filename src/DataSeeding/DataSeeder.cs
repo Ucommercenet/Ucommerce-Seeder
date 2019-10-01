@@ -40,31 +40,30 @@ namespace Ucommerce.Seeder.DataSeeding
             {
                 // For now, only Umbraco is supported.
                 // You can disable Umbraco media seeding
-                ICmsContent content = _excludeCmsTables ? new NullContent() as ICmsContent : new UmbracoContentProvider();
+                ICmsContent cmsContent = _excludeCmsTables ? new NullContent() as ICmsContent : new UmbracoContentProvider();
 
                 var seedingTasks = new List<IDataSeedingTask>
                 {
                     new DefinitionSeedingTask(_sizeOptions.Definitions),
                     new DefinitionFieldSeedingTask(_sizeOptions.Definitions *
-                                                   _sizeOptions.AverageUserDefinedFieldsPerDefinition),
+                                                   _sizeOptions.AverageUserDefinedFieldsPerDefinition, cmsContent),
 
-                    new DataTypeSeedingTask(_sizeOptions.DataTypes, content),
-                    new LanguageSeedingTask(_sizeOptions.Languages),
+                    new DataTypeSeedingTask(_sizeOptions.DataTypes, cmsContent),
                     new CurrencySeedingTask(_sizeOptions.Currencies),
                     new PriceGroupSeedingTask(_sizeOptions.PriceGroups),
                     new ProductRelationTypeSeedingTask(_sizeOptions.ProductRelationTypes),
 
                     new ProductDefinitionSeedingTask(_sizeOptions.ProductDefinitions),
                     new ProductDefinitionFieldsSeedingTask(_sizeOptions.AverageUserDefinedFieldsPerDefinition *
-                                                           _sizeOptions.ProductDefinitions),
+                                                           _sizeOptions.ProductDefinitions, cmsContent),
 
-                    new StoreSeedingTask(_sizeOptions.Stores, content),
-                    new CatalogSeedingTask(_sizeOptions.CatalogsPerStore * _sizeOptions.Stores, content),
+                    new StoreSeedingTask(_sizeOptions.Stores, cmsContent),
+                    new CatalogSeedingTask(_sizeOptions.CatalogsPerStore * _sizeOptions.Stores, cmsContent),
                     new CategorySeedingTask(_sizeOptions.Stores * _sizeOptions.CatalogsPerStore *
-                                            _sizeOptions.CategoriesPerCatalog, content),
+                                            _sizeOptions.CategoriesPerCatalog, cmsContent),
 
-                    new ProductSeedingTask(_sizeOptions, content),
-                    new VariantSeedingTask(_sizeOptions, content),
+                    new ProductSeedingTask(_sizeOptions, cmsContent),
+                    new VariantSeedingTask(_sizeOptions, cmsContent),
 
                     new ProductCategoryRelationSeedingTask(_sizeOptions),
                 };
@@ -72,6 +71,7 @@ namespace Ucommerce.Seeder.DataSeeding
                 if (!_excludeCmsTables)
                 {
                     seedingTasks.Insert(0, new UmbracoMediaSeedingTask(_sizeOptions));
+                    seedingTasks.Insert(1, new LanguageSeedingTask(_sizeOptions.Languages));
                 }
 
                 foreach (var task in seedingTasks)

@@ -22,5 +22,10 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                 .Where(x => x.NodeObjectType == UmbracoContentNodeType)
                 .Select(x => x.UniqueId).ToArray();
         }
+
+        public string[] GetLanguageIsoCodes(UmbracoDbContext context)
+        {
+            return context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
+        }
     }
 }

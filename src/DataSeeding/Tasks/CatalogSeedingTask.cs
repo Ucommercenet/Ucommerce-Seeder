@@ -42,7 +42,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.Catalog).Select(c => c.DefinitionId)
                 .ToArray();
 
-            var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
+            var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var priceGroupIds = context.UCommercePriceGroup.Select(x => x.PriceGroupId).ToArray();
 
             var catalogs = await GenerateCatalogs(context, definitionIds, priceGroupIds);
