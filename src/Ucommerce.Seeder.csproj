@@ -35,9 +35,14 @@
       <Content Include="propertyData.template">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <None Remove="media\**" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="media" />
+      <Compile Remove="media\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="media\**" />
     </ItemGroup>
 </Project>
