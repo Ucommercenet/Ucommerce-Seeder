@@ -50,7 +50,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             {
                 var mediaIds = _cmsContent.GetAllMediaIds(context);
                 var contentIds = _cmsContent.GetAllContentIds(context);
-                var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
+                var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
                 var definitionFields = LookupDefinitionFields(context, definitionIds);
 
                 uint batchSize = 100_000;

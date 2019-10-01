@@ -7,5 +7,6 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
     {
         Guid[] GetAllMediaIds(UmbracoDbContext context);
         Guid[] GetAllContentIds(UmbracoDbContext context);
+        string[] GetLanguageIsoCodes(UmbracoDbContext context);
     }
 }

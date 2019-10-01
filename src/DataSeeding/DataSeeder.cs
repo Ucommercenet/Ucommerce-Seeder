@@ -46,7 +46,7 @@ namespace Ucommerce.Seeder.DataSeeding
                 {
                     new DefinitionSeedingTask(_sizeOptions.Definitions),
                     new DefinitionFieldSeedingTask(_sizeOptions.Definitions *
-                                                   _sizeOptions.AverageUserDefinedFieldsPerDefinition),
+                                                   _sizeOptions.AverageUserDefinedFieldsPerDefinition, content),
 
                     new DataTypeSeedingTask(_sizeOptions.DataTypes, content),
                     new CurrencySeedingTask(_sizeOptions.Currencies),
@@ -55,7 +55,7 @@ namespace Ucommerce.Seeder.DataSeeding
 
                     new ProductDefinitionSeedingTask(_sizeOptions.ProductDefinitions),
                     new ProductDefinitionFieldsSeedingTask(_sizeOptions.AverageUserDefinedFieldsPerDefinition *
-                                                           _sizeOptions.ProductDefinitions),
+                                                           _sizeOptions.ProductDefinitions, content),
 
                     new StoreSeedingTask(_sizeOptions.Stores, content),
                     new CatalogSeedingTask(_sizeOptions.CatalogsPerStore * _sizeOptions.Stores, content),

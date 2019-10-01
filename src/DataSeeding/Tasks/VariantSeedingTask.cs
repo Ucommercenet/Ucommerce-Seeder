@@ -29,7 +29,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         public override async Task Seed(UmbracoDbContext context)
         {
             var productDefinitionIds = context.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToArray();
-            var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
+            var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var productDefinitionFields = LookupProductDefinitionFields(context, true);
             var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
             var productIds = context.UCommerceProduct.Select(product => product.ProductId).ToArray();

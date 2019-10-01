@@ -49,7 +49,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var definitionIds = context.UCommerceDefinition
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.Category).Select(c => c.DefinitionId)
                 .ToArray();
-            var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
+            var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var mediaIds = _cmsContent.GetAllMediaIds(context);
 
             var topLevelCategories = await GenerateCategories(context, definitionIds, catalogIds, mediaIds);

@@ -49,7 +49,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
             Console.Write($"Generating properties for {Count:N0} data types.");
             using (var p = new ProgressBar())
             {
-                var languageCodes = context.UmbracoLanguage.Select(x => x.LanguageIsocode).ToArray();
+                var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
                 var mediaIds = _cmsContent.GetAllMediaIds(context);
                 var contentIds = _cmsContent.GetAllContentIds(context);
 
