@@ -49,7 +49,6 @@ namespace Ucommerce.Seeder.DataSeeding
                                                    _sizeOptions.AverageUserDefinedFieldsPerDefinition),
 
                     new DataTypeSeedingTask(_sizeOptions.DataTypes, content),
-                    new LanguageSeedingTask(_sizeOptions.Languages),
                     new CurrencySeedingTask(_sizeOptions.Currencies),
                     new PriceGroupSeedingTask(_sizeOptions.PriceGroups),
                     new ProductRelationTypeSeedingTask(_sizeOptions.ProductRelationTypes),
@@ -72,6 +71,8 @@ namespace Ucommerce.Seeder.DataSeeding
                 if (!_excludeCmsTables)
                 {
                     seedingTasks.Insert(0, new UmbracoMediaSeedingTask(_sizeOptions));
+                    seedingTasks.Insert(1, new LanguageSeedingTask(_sizeOptions.Languages));
+
                 }
 
                 foreach (var task in seedingTasks)
