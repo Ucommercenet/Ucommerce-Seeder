@@ -35,7 +35,7 @@ namespace Ucommerce.Seeder.DataSeeding
 
 
         protected IEnumerable<UCommerceEntityProperty> AddEntityProperty(Guid entityGuid,
-            UCommerceDefinitionField field, string[] languageCodes, Guid[] mediaIds, Guid[] contentIds, string editor,
+            UCommerceDefinitionField field, string[] languageCodes, string[] mediaIds, string[] contentIds, string editor,
             Guid[] enumGuids)
         {
             if (field.Multilingual)

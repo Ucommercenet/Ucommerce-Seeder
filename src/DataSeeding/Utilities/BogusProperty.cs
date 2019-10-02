@@ -7,28 +7,28 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
     public static class BogusProperty
     {
         private static readonly Dictionary<BuiltInEditors,
-            Func<IEnumerable<Guid>, IEnumerable<Guid>, IEnumerable<Guid>, string>> _values =
-            new Dictionary<BuiltInEditors, Func<IEnumerable<Guid>, IEnumerable<Guid>, IEnumerable<Guid>, string>>
+            Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<Guid>, string>> _values =
+            new Dictionary<BuiltInEditors, Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<Guid>, string>>
             {
                 {BuiltInEditors.RichText, (mediaGuids, contentGuids, enumGuids) => _faker.Lorem.Paragraphs(3)},
                 {
                     BuiltInEditors.Media,
-                    (mediaGuids, contentGuids, enumGuids) => _faker.PickRandom(mediaGuids).ToString()
+                    (mediaGuids, contentGuids, enumGuids) => _faker.PickRandomOrDefault(mediaGuids)
                 },
                 {
                     BuiltInEditors.Content,
-                    (mediaGuids, contentGuids, enumGuids) => _faker.PickRandom(contentGuids).ToString()
+                    (mediaGuids, contentGuids, enumGuids) => _faker.PickRandomOrDefault(contentGuids)
                 },
                 {
                     BuiltInEditors.EmailContent,
-                    (mediaGuids, contentGuids, enumGuids) => _faker.PickRandom(contentGuids).ToString()
+                    (mediaGuids, contentGuids, enumGuids) => _faker.PickRandomOrDefault(contentGuids)
                 },
                 {BuiltInEditors.DateTime, (mediaGuids, contentGuids, enumGuids) => _faker.Date.Recent().ToString()},
                 {BuiltInEditors.Boolean, (mediaGuids, contentGuids, enumGuids) => _faker.Random.Bool().ToString()},
                 {
                     BuiltInEditors.ImagePickerMultiSelect,
                     (mediaGuids, contentGuids, enumGuids) =>
-                        String.Join("|", _faker.PickRandom(mediaGuids, _faker.Random.UShort(0, 5)))
+                        String.Join("|", _faker.PickRandomOrDefault(mediaGuids, _faker.Random.UShort(0, 5)))
                 },
                 {BuiltInEditors.ShortText, (mediaGuids, contentGuids, enumGuids) => _faker.Lorem.Sentence()},
                 {BuiltInEditors.LongText, (mediaGuids, contentGuids, enumGuids) => _faker.Lorem.Sentences(3)},
@@ -53,7 +53,7 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
         // ReSharper disable once InconsistentNaming
         private static readonly Faker _faker = new Faker();
 
-        public static string BogusValue(IEnumerable<Guid> mediaGuids, IEnumerable<Guid> contentGuids, string editor,
+        public static string BogusValue(IEnumerable<string> mediaGuids, IEnumerable<string> contentGuids, string editor,
             IEnumerable<Guid> enums)
         {
             if (Enum.TryParse(editor, out BuiltInEditors editorEnum))
