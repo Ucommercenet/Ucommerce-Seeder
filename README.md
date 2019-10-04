@@ -2,7 +2,7 @@
 Ucommerce.Seeder
 ===
 
-This small tool in invaluable for creating medium, large and huge databases with lots of product data.
+This small tool is invaluable for creating medium, large and huge databases with lots of product data.
 
 Ever tried implementing a webshop on a database with two products in it? It performs well. Until reality strikes and the production database contains 100.000s of products and prices. 
 
