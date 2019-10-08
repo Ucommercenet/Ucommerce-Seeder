@@ -24,6 +24,35 @@ namespace Ucommerce.Seeder
         public uint DataTypes;
         public uint AverageUserDefinedFieldsPerDefinition;
         public uint ProductRelationTypes;
+        public uint OrderNumberSeries;
+
+        public static readonly DatabaseSize Realistic = new DatabaseSize
+        {
+            DataTypes = 2,
+            ProductDefinitions = 5,
+            Definitions = 5,
+            ProductRelationTypes = 2,
+            OrderNumberSeries = 5,
+            
+            AverageUserDefinedFieldsPerDefinition = 20,
+
+            Languages = 7,
+            Currencies = 100,
+            PriceGroups = 3_000,
+            TiersPerPriceGroup = 10,
+
+            Products = 500_000,
+            AverageVariantsPerProduct = 10,
+            ProductRelationsPerProduct = 5,
+
+            Stores = 5,
+            CatalogsPerStore = 5,
+            CategoriesPerCatalog = 100,
+            AverageProductsPerCategory = 1_000,
+            
+            CmsMediaFolders = 10,
+            CmsImagesPerFolder = 100
+        };
 
         public static readonly DatabaseSize Huge = new DatabaseSize
         {
@@ -31,7 +60,8 @@ namespace Ucommerce.Seeder
             ProductDefinitions = 100,
             Definitions = 100,
             ProductRelationTypes = 20,
-            
+            OrderNumberSeries = 20,
+
             AverageUserDefinedFieldsPerDefinition = 1_200,
 
             Languages = 30,
@@ -58,7 +88,8 @@ namespace Ucommerce.Seeder
             ProductDefinitions = 20,
             Definitions = 20,
             ProductRelationTypes = 10,
-            
+            OrderNumberSeries = 5,
+
             AverageUserDefinedFieldsPerDefinition = 10,
 
             Languages = 10,
@@ -86,6 +117,7 @@ namespace Ucommerce.Seeder
             ProductDefinitions = 5,
             Definitions = 10,
             ProductRelationTypes = 3,
+            OrderNumberSeries = 1,
 
             AverageUserDefinedFieldsPerDefinition = 5,
 

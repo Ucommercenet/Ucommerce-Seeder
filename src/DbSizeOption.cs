@@ -5,6 +5,7 @@ namespace Ucommerce.Seeder
         Huge,
         Large,
         Medium,
-        TinyForTesting
+        TinyForTesting,
+        Realistic
     }
 }
