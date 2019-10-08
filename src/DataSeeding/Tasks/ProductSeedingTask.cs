@@ -271,7 +271,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             {
                 var products =
                     GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
-                        Count);
+                        Count)
+                        .DistinctBy(x => x.UniqueIndex())
+                        .ToArray();
                 p.Report(0.5);
                 await context.BulkInsertAsync(products, options => options.BatchSize = 100_000);
                 return products;
