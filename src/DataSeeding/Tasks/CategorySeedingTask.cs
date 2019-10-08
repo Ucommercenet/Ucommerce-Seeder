@@ -65,7 +65,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         private async Task<IEnumerable<UCommerceCategory>> GenerateSubCategories(UmbracoDbContext context,
-            int[] definitionIds, Guid[] mediaIds, UCommerceCategory[] topLevelCategories)
+            int[] definitionIds, string[] mediaIds, UCommerceCategory[] topLevelCategories)
         {
             Console.Write($"Generating {4 * Count / 5:N0} subcategories. ");
             using (var p = new ProgressBar())
@@ -82,7 +82,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
         private async Task GenerateProperties(UmbracoDbContext context, int[] definitionIds,
             UCommerceCategory[] categories,
-            string[] languageCodes, Guid[] mediaIds)
+            string[] languageCodes, string[] mediaIds)
         {
             var definitionFields = LookupDefinitionFields(context, definitionIds);
             uint estimatedPropertyCount = definitionFields.Any() ? (uint) definitionFields.Average(x => x.Count()) * (uint) categories.Length : 1;
@@ -132,7 +132,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         private async Task<UCommerceCategory[]> GenerateCategories(UmbracoDbContext context, int[] definitionIds,
-            int[] catalogIds, Guid[] mediaIds)
+            int[] catalogIds, string[] mediaIds)
         {
             Console.Write($"Generating {Count / 5:N0} top level categories. ");
             using (var p = new ProgressBar())
@@ -148,7 +148,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         private IEnumerable<UCommerceCategoryProperty> AddCategoryProperty(int categoryId,
-            UCommerceDefinitionField field, string[] languageCodes, Guid[] mediaIds, Guid[] contentIds, string editor,
+            UCommerceDefinitionField field, string[] languageCodes, string[] mediaIds, string[] contentIds, string editor,
             Guid[] enumGuids)
         {
             if (field.Multilingual)
@@ -177,22 +177,22 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        private UCommerceCategory GenerateCategory(int[] definitionIds, int[] catalogIds, Guid[] mediaIds)
+        private UCommerceCategory GenerateCategory(int[] definitionIds, int[] catalogIds, string[] mediaIds)
         {
             return _categoryFaker
                 .RuleFor(x => x.DefinitionId, f => f.PickRandom(definitionIds))
                 .RuleFor(x => x.ProductCatalogId, f => f.PickRandom(catalogIds))
-                .RuleFor(x => x.ImageMediaId, f => f.PickRandom(mediaIds).ToString())
+                .RuleFor(x => x.ImageMediaId, f => f.PickRandomOrDefault(mediaIds))
                 .Generate();
         }
 
-        private UCommerceCategory GenerateSubCategory(int[] definitionIds, Guid[] mediaIds, UCommerceCategory[] parentCategories)
+        private UCommerceCategory GenerateSubCategory(int[] definitionIds, string[] mediaIds, UCommerceCategory[] parentCategories)
         {
             var parentCategory = _faker.PickRandom(parentCategories);
             return _categoryFaker
                 .RuleFor(x => x.DefinitionId, f => f.PickRandom(definitionIds))
                 .RuleFor(x => x.ProductCatalogId, f => parentCategory.ProductCatalogId)
-                .RuleFor(x => x.ImageMediaId, f => f.PickRandom(mediaIds).ToString())
+                .RuleFor(x => x.ImageMediaId, f => f.PickRandomOrDefault(mediaIds))
                 .RuleFor(x => x.ParentCategoryId, f => parentCategory.CategoryId)
                 .Generate();
         }

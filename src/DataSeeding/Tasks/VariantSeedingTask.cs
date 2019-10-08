@@ -26,17 +26,28 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             get => _databaseSize.AverageVariantsPerProduct * _databaseSize.Products;
         }
 
+        public class ProductWithDefinition
+        {
+            public int ProductId { get; set; }
+            public int ProductDefinitionId { get; set; }
+        }
+
         public override async Task Seed(UmbracoDbContext context)
         {
-            var productDefinitionIds = context.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToArray();
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var productDefinitionFields = LookupProductDefinitionFields(context, true);
             var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
-            var productIds = context.UCommerceProduct.Select(product => product.ProductId).ToArray();
+            
+            var productFamilyIds = context.UCommerceProduct
+                .Where(p => p.ProductDefinition.UCommerceProductDefinitionField.Any(f => f.IsVariantProperty)) // pick families only
+                .Where(p => p.ParentProductId == null) // don't pick variants
+                .Select(product => new ProductWithDefinition {ProductId = product.ProductId, ProductDefinitionId = product.ProductDefinitionId})
+                .ToArray();
+            
             var mediaIds = _cmsContent.GetAllMediaIds(context);
             var contentIds = _cmsContent.GetAllMediaIds(context);
 
-            var products = await GenerateVariants(context, productDefinitionIds, languageCodes, productIds, mediaIds);
+            var products = await GenerateVariants(context, productFamilyIds, mediaIds);
 
             await GenerateDescriptions(context, languageCodes, products);
 
@@ -44,28 +55,35 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
             await GeneratePrices(context, priceGroupIds, products);
         }
-        
-        protected async Task<UCommerceProduct[]> GenerateVariants(UmbracoDbContext context, int[] productDefinitionIds,
-            string[] languageCodes, int[] productIds, Guid[] mediaIds)
+
+        protected async Task<UCommerceProduct[]> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products, string[] mediaIds)
         {
             Console.Write($"Generating {Count:N0} {EntityNamePlural}. ");
             using (var p = new ProgressBar())
             {
                 var variants =
-                    GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
+                    GeneratorHelper.Generate(() => GenerateVariant(mediaIds, products),
                         Count).ToArray();
 
-                p.Report(0.33);
-                foreach (var variant in variants)
-                {
-                    variant.VariantSku = _faker.Commerce.Ean8();
-                    variant.ParentProductId = _faker.PickRandom(productIds);
-                }
-
-                p.Report(0.66);
+                p.Report(0.5);
                 await context.BulkInsertAsync(variants, options => options.BatchSize = 100_000);
                 return variants;
             }
+        }
+
+        private UCommerceProduct GenerateVariant(string[] mediaIds, ProductWithDefinition[] products)
+        {
+            var productFamily = _faker.PickRandom(products);
+            var product = _productFaker
+                .RuleFor(x => x.ParentProductId, f => productFamily.ProductId)
+                .RuleFor(x => x.ProductDefinitionId, f => productFamily.ProductDefinitionId)
+                .RuleFor(x => x.PrimaryImageMediaId, f => f.PickRandomOrDefault(mediaIds))
+                .RuleFor(x => x.ThumbnailImageMediaId, f => f.PickRandomOrDefault(mediaIds))
+                .RuleFor(x => x.VariantSku, f => f.Commerce.Ean8())
+                .Generate();
+
+            return product;
+
         }
     }
 }

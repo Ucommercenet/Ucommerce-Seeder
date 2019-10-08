@@ -215,8 +215,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         protected async Task GenerateProperties(UmbracoDbContext context, UCommerceProduct[] products,
-            ILookup<int, ProductDefinitionFieldEditorAndEnum> productDefinitionFields, Guid[] mediaIds,
-            Guid[] contentIds)
+            ILookup<int, ProductDefinitionFieldEditorAndEnum> productDefinitionFields, string[] mediaIds,
+            string[] contentIds)
         {
             uint averageNumberOfFieldsPerProduct = productDefinitionFields.Any()
                 ? (uint) productDefinitionFields.Average(f => f.Count()) / 2
@@ -264,7 +264,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         protected async Task<UCommerceProduct[]> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
-            string[] languageCodes, Guid[] mediaIds)
+            string[] languageCodes, string[] mediaIds)
         {
             Console.Write($"Generating {Count:N0} products. ");
             using (var p = new ProgressBar())
@@ -323,7 +323,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
         protected UCommerceProductDescriptionProperty[] GenerateLanguageVariantProductProperties(
             IEnumerable<int> descriptionIds,
-            IEnumerable<ProductDefinitionFieldEditorAndEnum> fields, Guid[] mediaIds, Guid[] contentIds)
+            IEnumerable<ProductDefinitionFieldEditorAndEnum> fields, string[] mediaIds, string[] contentIds)
         {
             return fields
                 .Where(field => field.Field.Multilingual)
@@ -340,7 +340,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         protected UCommerceProductProperty[] GenerateLanguageInvariantProductProperties(int productId,
-            IEnumerable<ProductDefinitionFieldEditorAndEnum> fields, Guid[] mediaIds, Guid[] contentIds)
+            IEnumerable<ProductDefinitionFieldEditorAndEnum> fields, string[] mediaIds, string[] contentIds)
         {
             return fields
                 .Where(field => !field.Field.Multilingual)
@@ -353,12 +353,12 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         .Generate()).ToArray();
         }
 
-        protected UCommerceProduct GenerateProduct(int[] productDefinitionIds, string[] languageCodes, Guid[] mediaIds)
+        protected UCommerceProduct GenerateProduct(int[] productDefinitionIds, string[] languageCodes, string[] mediaIds)
         {
             var product = _productFaker
                 .RuleFor(x => x.ProductDefinitionId, f => f.PickRandom(productDefinitionIds))
-                .RuleFor(x => x.PrimaryImageMediaId, f => f.PickRandom(mediaIds).ToString())
-                .RuleFor(x => x.ThumbnailImageMediaId, f => f.PickRandom(mediaIds).ToString())
+                .RuleFor(x => x.PrimaryImageMediaId, f => f.PickRandomOrDefault(mediaIds))
+                .RuleFor(x => x.ThumbnailImageMediaId, f => f.PickRandomOrDefault(mediaIds))
                 .Generate();
 
             return product;

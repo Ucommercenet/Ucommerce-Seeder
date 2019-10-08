@@ -43,3 +43,4 @@ src/.idea/*
 tools/LiveSync-*
 .idea/
 .vscode/
+db/umbraco810_done.*
