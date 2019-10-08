@@ -78,9 +78,10 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             {
                 var emailProfileIds = context.UCommerceEmailProfile.Select(x => x.EmailProfileId).ToArray();
                 var currencyIds = context.UCommerceCurrency.Select(c => c.CurrencyId).ToArray();
+                var orderNumberSeriesIds = context.UCommerceOrderNumberSerie.Select(c => c.OrderNumberId).ToArray();
                 p.Report(0.1);
                 var stores =
-                    GeneratorHelper.Generate(() => GenerateStore(currencyIds, definitionIds, emailProfileIds), Count);
+                    GeneratorHelper.Generate(() => GenerateStore(currencyIds, definitionIds, emailProfileIds, orderNumberSeriesIds), Count);
                 p.Report(0.5);
                 await context.BulkInsertAsync(stores);
                 return stores;
@@ -88,12 +89,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         private UCommerceProductCatalogGroup GenerateStore(int[] currencyIds, int[] definitionIds,
-            int[] emailProfileIds)
+            int[] emailProfileIds, int[] orderNumberSeriesIds)
         {
             return _storeFaker
                 .RuleFor(x => x.DefinitionId, f => f.PickRandom(definitionIds))
                 .RuleFor(x => x.CurrencyId, f => f.PickRandom(currencyIds))
                 .RuleFor(x => x.EmailProfileId, f => f.PickRandom(emailProfileIds))
+                .RuleFor(x => x.OrderNumberId, f => f.PickRandom(orderNumberSeriesIds))
                 .Generate();
         }
 

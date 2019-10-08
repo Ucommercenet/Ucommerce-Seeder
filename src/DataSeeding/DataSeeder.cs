@@ -52,6 +52,7 @@ namespace Ucommerce.Seeder.DataSeeding
                     new CurrencySeedingTask(_sizeOptions.Currencies),
                     new PriceGroupSeedingTask(_sizeOptions.PriceGroups),
                     new ProductRelationTypeSeedingTask(_sizeOptions.ProductRelationTypes),
+                    new OrderNumberSeriesSeedingTask(_sizeOptions.OrderNumberSeries),
 
                     new ProductDefinitionSeedingTask(_sizeOptions.ProductDefinitions),
                     new ProductDefinitionFieldsSeedingTask(_sizeOptions.AverageUserDefinedFieldsPerDefinition *
