@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Ucommerce.Seeder.DataSeeding.Tasks;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
-using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
 namespace Ucommerce.Seeder.DataSeeding

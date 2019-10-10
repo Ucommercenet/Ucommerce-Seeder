@@ -16,15 +16,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             _cmsContent = cmsContent;
         }
 
-        protected override string EntityNamePlural
-        {
-            get => "variants";
-        }
+        protected override string EntityNamePlural => "variants";
 
-        public override uint Count
-        {
-            get => _databaseSize.AverageVariantsPerProduct * _databaseSize.Products;
-        }
+        public override uint Count => _databaseSize.AverageVariantsPerProduct * _databaseSize.Products;
 
         public class ProductWithDefinition
         {
