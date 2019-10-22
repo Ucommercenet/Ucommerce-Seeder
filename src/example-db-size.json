@@ -1,0 +1,21 @@
+{
+  "AverageProductsPerCategory": 1000,
+  "AverageUserDefinedFieldsPerDefinition": 20,
+  "AverageVariantsPerProduct": 10,
+  "CatalogsPerStore": 5,
+  "CategoriesPerCatalog": 100,
+  "CmsImagesPerFolder": 100,
+  "CmsMediaFolders": 9,
+  "Currencies": 100,
+  "DataTypes": 2,
+  "Definitions": 5,
+  "Languages": 7,
+  "OrderNumberSeries": 5,
+  "PriceGroups": 3000,
+  "ProductDefinitions": 5,
+  "ProductRelationTypes": 2,
+  "ProductRelationsPerProduct": 5,
+  "Products": 500000,
+  "Stores": 5,
+  "TiersPerPriceGroup": 10
+}
