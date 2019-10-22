@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
@@ -24,15 +25,27 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             Console.Write($"Generating {Count} currencies. ");
             using (var p = new ProgressBar())
             {
-                var currenciesLeft = Count - DefaultCurrencies.Length;
+                var defaultCurrenciesNotInDb = GetDefaultCurrenciesNotInDb(context);
+                var currenciesLeft = Math.Max(0, Count - defaultCurrenciesNotInDb.Count);
 
-                var currencies = currenciesLeft <= 0
-                    ? DefaultCurrencies.Take((int) Count)
-                    : DefaultCurrencies.Concat(GeneratorHelper.Generate(GenerateCurrency, (uint)currenciesLeft));
+                var currencies = currenciesLeft == 0
+                    ? defaultCurrenciesNotInDb.Take((int) Count)
+                    : defaultCurrenciesNotInDb.Concat(GeneratorHelper.Generate(GenerateCurrency, (uint)currenciesLeft))
+                        .DistinctBy(x => x.Isocode);
 
                 p.Report(0.5);
                 await context.BulkInsertAsync(currencies, options => options.AutoMapOutputDirection = false);
             }
+        }
+
+        private List<UCommerceCurrency> GetDefaultCurrenciesNotInDb(UmbracoDbContext context)
+        {
+            var preSeededCurrencies = context.UCommerceCurrency.ToList();
+
+            return DefaultCurrencies.Where(x => !preSeededCurrencies
+                    .Select(y => y.Isocode)
+                    .Contains(x.Isocode))
+                .ToList();
         }
 
         private UCommerceCurrency GenerateCurrency()
@@ -44,7 +57,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         {
             new UCommerceCurrency { Isocode  = "EUR", ExchangeRate = 100, Deleted = false, Guid = Guid.NewGuid() },
             new UCommerceCurrency { Isocode  = "DKK", ExchangeRate = 744, Deleted = false, Guid = Guid.NewGuid() },
-            new UCommerceCurrency { Isocode  = "GPP", ExchangeRate = 88, Deleted = false, Guid = Guid.NewGuid() },
+            new UCommerceCurrency { Isocode  = "GBP", ExchangeRate = 88, Deleted = false, Guid = Guid.NewGuid() },
             new UCommerceCurrency { Isocode  = "USD", ExchangeRate = 143, Deleted = false, Guid = Guid.NewGuid() },
             new UCommerceCurrency { Isocode  = "AUD", ExchangeRate = 163, Deleted = false, Guid = Guid.NewGuid() },
         };
