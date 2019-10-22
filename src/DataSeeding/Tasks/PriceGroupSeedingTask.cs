@@ -48,7 +48,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         {
             var (currencyId, currencyName) = _faker.PickRandom(currencyIds);
             var vatRate = Math.Round(_faker.Random.Decimal(0.0M, 0.25M), 2);
-            var name = _faker.Random.Bool() ? _faker.Commerce.Department() : $"{currencyName} {vatRate * 100} % VAT";
+            var name = $"{currencyName} {vatRate * 100} % VAT";
+
             return _priceGroupFaker
                 .RuleFor(x => x.CurrencyId, f => currencyId)
                 .RuleFor(x => x.Name, f => name)

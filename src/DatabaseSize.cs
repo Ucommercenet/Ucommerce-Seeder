@@ -36,13 +36,13 @@ namespace Ucommerce.Seeder
             
             AverageUserDefinedFieldsPerDefinition = 20,
 
-            Languages = 7,
-            Currencies = 100,
-            PriceGroups = 3_000,
-            TiersPerPriceGroup = 10,
+            Languages = 4,
+            Currencies = 6,
+            PriceGroups = 5,
+            TiersPerPriceGroup = 2,
 
             Products = 500_000,
-            AverageVariantsPerProduct = 10,
+            AverageVariantsPerProduct = 0,
             ProductRelationsPerProduct = 5,
 
             Stores = 5,

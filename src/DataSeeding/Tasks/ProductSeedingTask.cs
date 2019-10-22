@@ -73,10 +73,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.Guid, f => f.Random.Guid());
         }
 
-        protected virtual string EntityNamePlural
-        {
-            get => "products";
-        }
+        protected virtual string EntityNamePlural => "products";
 
         public override async Task Seed(UmbracoDbContext context)
         {
