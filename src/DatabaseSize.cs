@@ -28,7 +28,7 @@ namespace Ucommerce.Seeder
 
         public static readonly DatabaseSize Realistic = new DatabaseSize
         {
-            DataTypes = 2,
+            DataTypes = 0,
             ProductDefinitions = 5,
             Definitions = 5,
             ProductRelationTypes = 2,
@@ -113,7 +113,7 @@ namespace Ucommerce.Seeder
 
         public static readonly DatabaseSize Medium = new DatabaseSize
         {
-            DataTypes = 5,
+            DataTypes = 0,
             ProductDefinitions = 5,
             Definitions = 10,
             ProductRelationTypes = 3,
