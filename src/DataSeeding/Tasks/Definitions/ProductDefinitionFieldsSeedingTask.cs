@@ -75,7 +75,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .ToList();
                 
                 p.Report(0.75);
-                context.BulkInsert(allFields);
+                context.BulkInsert(allFields, options => options.SetOutputIdentity = true);
                 return allFields;
             }
         }
@@ -93,9 +93,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                             .RuleFor(x => x.CultureCode, f => language)
                             .Generate()
                     )
-                );
+                ).ToList();
                 p.Report(0.5);
-                context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
+                context.BulkInsert(descriptions, options => options.SetOutputIdentity = true);
             }
         }
 

@@ -77,7 +77,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
 
                 var folderContents = folderNodes.Select(folder => new UmbracoContent
                     {NodeId = folder.Id, ContentTypeId = mediaFolderType}).ToArray();
-                context.BulkInsert(folderContents);
+                context.BulkInsert(folderContents, options => options.SetOutputIdentity = true);
                 p.Report(0.2);
 
 
@@ -148,7 +148,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
 
                 var folderMediaVersions = folderContentVersions
                     .Select(contentVersion => new UmbracoMediaVersion {Id = contentVersion.Id, Path = ""}).ToList();
-                context.BulkInsert(folderMediaVersions, options => options.SetOutputIdentity = false);
+                context.BulkInsert(folderMediaVersions, options => options.SetOutputIdentity = true);
                 p.Report(0.8);
 
 
@@ -157,7 +157,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                 var imageContentVersions = imageNodes
                     .Select(media => new UmbracoContentVersion
                         {Current = true, NodeId = media.Id, Text = media.Text, UserId = -1, VersionDate = DateTime.Now}).ToList();
-                context.BulkInsert(imageContentVersions);
+                context.BulkInsert(imageContentVersions, options => options.SetOutputIdentity = true);
 
                 var propertyData = imageContentVersions.SelectMany(contentVersion =>
                 {
