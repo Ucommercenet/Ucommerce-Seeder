@@ -59,30 +59,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var secondLevelCategories =
                 GenerateSubCategories(context, definitionIds, mediaIds, topLevelCategories);
 
-            var categories = topLevelCategories.Concat(secondLevelCategories).ToArray();
+            var categories = topLevelCategories.Concat(secondLevelCategories).ToList();
 
             GenerateDescriptions(context, categories, languageCodes);
 
             GenerateProperties(context, definitionIds, categories, languageCodes, mediaIds);
         }
 
-        private List<UCommerceCategory> GenerateSubCategories(UmbracoDbContext context,
-            int[] definitionIds, string[] mediaIds, IEnumerable<UCommerceCategory> topLevelCategories)
-        {
-            Console.Write($"Generating {4 * Count / 5:N0} subcategories. ");
-            using (var p = new ProgressBar())
-            {
-                var categories = GeneratorHelper
-                    .Generate(() => GenerateSubCategory(definitionIds, mediaIds, topLevelCategories), 4 * Count / 5)
-                    .DistinctBy(a => a.UniqueIndex())
-                    .ToList();
-                
-                p.Report(0.5);
-                
-                context.BulkInsert(categories, options => options.SetOutputIdentity = true);
-                return categories;
-            }
-        }
 
         private void GenerateProperties(UmbracoDbContext context, int[] definitionIds,
             IEnumerable<UCommerceCategory> categories,
@@ -115,9 +98,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceCategory> categories,
             string[] languageCodes)
         {
-            uint batchSize = 1_000_000;
+            uint batchSize = 100_000;
             uint numberOfBatches = (uint) categories.Count() * (uint) languageCodes.Length / batchSize; 
-            Console.Write($"Generating {categories.Count() * languageCodes.Length:N0} descriptions for {categories.Count():N0} categories. ");
+            Console.Write($"Generating {categories.Count() * languageCodes.Length:N0} descriptions for {categories.Count():N0} categories in batches of {batchSize:N0}. ");
             using (var p = new ProgressBar())
             {
                 var descriptionBatches = categories.SelectMany(category =>
@@ -138,18 +121,52 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         private List<UCommerceCategory> GenerateCategories(UmbracoDbContext context, int[] definitionIds,
             int[] catalogIds, string[] mediaIds)
         {
-            Console.Write($"Generating {Count / 5:N0} top level categories. ");
+            uint batchSize = 100_000;
+            uint numberOfBatches = Count / 5 / batchSize;
+            Console.Write($"Generating {Count / 5:N0} top level categories in batches of {batchSize:N0}. ");
+            var insertedCategories = new List<UCommerceCategory>((int)Count / 5);
             using (var p = new ProgressBar())
             {
-                var categories = GeneratorHelper
+                var categoryBatches = GeneratorHelper
                     .Generate(() => GenerateCategory(definitionIds, catalogIds, mediaIds), Count / 5)
                     .DistinctBy(a => a.UniqueIndex())
-                    .ToList();
+                    .Batch(batchSize);
                 
-                p.Report(0.5);
+                categoryBatches.EachWithIndex((categories, index) =>
+                {
+                    var listOfCats = categories.ToList();
+                    context.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
+                    insertedCategories.AddRange(listOfCats);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
                 
-                context.BulkInsert(categories, options => options.SetOutputIdentity = true);
-                return categories;
+                return insertedCategories;
+            }
+        }
+
+        private List<UCommerceCategory> GenerateSubCategories(UmbracoDbContext context,
+            int[] definitionIds, string[] mediaIds, IEnumerable<UCommerceCategory> topLevelCategories)
+        {
+            uint batchSize = 100_000;
+            uint numberOfBatches = 4 * Count / 5 / batchSize;
+            Console.Write($"Generating {4 * Count / 5:N0} subcategories in batches of {batchSize}. ");
+            var insertedCategories = new List<UCommerceCategory>((int)Count / 5);
+            using (var p = new ProgressBar())
+            {
+                var categoryBatches = GeneratorHelper
+                    .Generate(() => GenerateSubCategory(definitionIds, mediaIds, topLevelCategories), 4 * Count / 5)
+                    .DistinctBy(a => a.UniqueIndex())
+                    .Batch(batchSize);
+                
+                categoryBatches.EachWithIndex((categories, index) =>
+                {
+                    var listOfCats = categories.ToList();
+                    context.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
+                    insertedCategories.AddRange(listOfCats);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
+                
+                return insertedCategories;
             }
         }
 
