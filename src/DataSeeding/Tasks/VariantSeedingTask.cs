@@ -62,7 +62,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         Count).ToList();
 
                 p.Report(0.5);
-                context.BulkInsertAsync(variants, options => options.SetOutputIdentity = true);
+                context.BulkInsert(variants, options => options.SetOutputIdentity = true);
                 return variants;
             }
         }
