@@ -62,16 +62,16 @@ namespace Ucommerce.Seeder
             ProductRelationTypes = 20,
             OrderNumberSeries = 20,
 
-            AverageUserDefinedFieldsPerDefinition = 1_200,
+            AverageUserDefinedFieldsPerDefinition = 200,
 
-            Languages = 30,
+            Languages = 20,
             Currencies = 100,
             PriceGroups = 3_000,
-            TiersPerPriceGroup = 10,
+            TiersPerPriceGroup = 5,
 
-            Products = 40000,
-            AverageVariantsPerProduct = 100,
-            ProductRelationsPerProduct = 100,
+            Products = 4000000,
+            AverageVariantsPerProduct = 8,
+            ProductRelationsPerProduct = 10,
 
             Stores = 1_000,
             CatalogsPerStore = 30,
