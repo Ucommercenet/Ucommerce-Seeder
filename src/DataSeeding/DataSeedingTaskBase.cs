@@ -31,7 +31,7 @@ namespace Ucommerce.Seeder.DataSeeding
             get => _count;
         }
 
-        public abstract Task Seed(UmbracoDbContext context);
+        public abstract void Seed(UmbracoDbContext context);
 
 
         protected IEnumerable<UCommerceEntityProperty> AddEntityProperty(Guid entityGuid,

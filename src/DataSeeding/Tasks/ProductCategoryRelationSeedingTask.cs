@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -24,7 +25,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.SortOrder, f => f.Random.Int(0, (int) Count));
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             int[] productIds = context.UCommerceProduct
                 .Where(product => product.UCommerceCategoryProductRelation.Count == 0)
@@ -44,9 +45,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     .DistinctBy(a => a.UniqueIndex())
                     .Batch(batchSize);
 
-                await relationBatches.EachWithIndexAsync(async (relations, index) =>
+                relationBatches.EachWithIndex((relations, index) =>
                 {
-                    await context.BulkInsertAsync(relations, options => options.AutoMapOutputDirection = false);
+                    context.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / batchCount);
                 });
             }

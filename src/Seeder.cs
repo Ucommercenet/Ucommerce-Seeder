@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Ucommerce.Seeder.DataSeeding;
 using Ucommerce.Seeder.Models;
-using Z.EntityFramework.Extensions;
 
 namespace Ucommerce.Seeder
 {
@@ -56,21 +55,13 @@ namespace Ucommerce.Seeder
                         throw new ArgumentException($"Unknown DbSizeOption value {dbSize}");
                 }
             }
-
-            // Needed for EF Extensions
-            EntityFrameworkManager.ContextFactory = context =>
-            {
-                var umbracoDbContext = new UmbracoDbContext(connectionString, verbose);
-                umbracoDbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                return umbracoDbContext;
-            };
         }
 
-        public async Task<int> Run()
+        public int Run()
         {
             var seeder = new DataSeeder(_dbSize, _excludeCmsTables);
 
-            await seeder.Seed(() =>
+            seeder.Seed(() =>
             {
                 var dbContext = new UmbracoDbContext(_connectionString, _verbose);
                 dbContext.ChangeTracker.AutoDetectChangesEnabled = false;

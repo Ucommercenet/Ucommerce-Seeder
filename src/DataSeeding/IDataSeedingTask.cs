@@ -6,7 +6,7 @@ namespace Ucommerce.Seeder.DataSeeding
 {
     public interface IDataSeedingTask
     {
-        Task Seed(UmbracoDbContext context);
+        void Seed(UmbracoDbContext context);
         uint Count { get; }
     }
 }

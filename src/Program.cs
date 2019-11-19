@@ -29,7 +29,7 @@ namespace Ucommerce.Seeder
                 app.Option<string>("-i|--input-json-file", 
                     "Define database dimensions in a json file. See the example file 'example-db-size.json'.", CommandOptionType.SingleOrNoValue);
 
-            app.OnExecute(async () =>
+            app.OnExecute(() =>
             {
                 var connectionString = connectionStringArgument.Value();
 
@@ -40,8 +40,7 @@ namespace Ucommerce.Seeder
                 }
                 
                 DbSizeOption dbSize = sizeArgument.HasValue() ? sizeArgument.ParsedValue : DbSizeOption.Huge;
-                int result = await new Seeder(connectionString, dbSize, verboseArgument.HasValue(), noCmsArgument.HasValue(), jsonFilePath.Value()).Run();
-                return result;
+                return new Seeder(connectionString, dbSize, verboseArgument.HasValue(), noCmsArgument.HasValue(), jsonFilePath.Value()).Run();
             });
 
             return app.Execute(args);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
@@ -32,18 +33,18 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.ValidationExpression, f => "");
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             var definitionIds = context.UCommerceDefinition
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.DataType).Select(c => c.DefinitionId)
                 .ToArray();
             var definitionFields = LookupDefinitionFields(context, definitionIds);
 
-            var dataTypes = await GenerateDataTypes(context, definitionIds);
-            await GenerateProperties(context, dataTypes, definitionFields);
+            var dataTypes = GenerateDataTypes(context, definitionIds);
+            GenerateProperties(context, dataTypes, definitionFields);
         }
 
-        private async Task GenerateProperties(UmbracoDbContext context, UCommerceDataType[] dataTypes,
+        private void GenerateProperties(UmbracoDbContext context, IEnumerable<UCommerceDataType> dataTypes,
             ILookup<int, DefinitionFieldEditorAndEnum> definitionFields)
         {
             Console.Write($"Generating properties for {Count:N0} data types.");
@@ -61,18 +62,18 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .ToArray();
 
                 p.Report(0.5);
-                await context.BulkInsertAsync(properties, options => options.AutoMapOutputDirection = false);
+                context.BulkInsert(properties, options => options.SetOutputIdentity = false);
             }
         }
 
-        private async Task<UCommerceDataType[]> GenerateDataTypes(UmbracoDbContext context, int[] definitionIds)
+        private List<UCommerceDataType> GenerateDataTypes(UmbracoDbContext context, int[] definitionIds)
         {
             Console.Write($"Generating {Count:N0} data types.");
             using (var p = new ProgressBar())
             {
-                var dataTypes = GeneratorHelper.Generate(() => Generate(definitionIds), Count);
+                var dataTypes = GeneratorHelper.Generate(() => Generate(definitionIds), Count).ToList();
                 p.Report(0.5);
-                await context.BulkInsertAsync(dataTypes);
+                context.BulkInsert(dataTypes);
                 return dataTypes;
             }
         }

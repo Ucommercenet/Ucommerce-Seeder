@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -25,7 +26,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.ModifiedBy, f => f.Name.FullName());
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             Console.Write($"Generating {Count:N0} price groups. ");
             using (var p = new ProgressBar())
@@ -40,7 +41,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 
                 p.Report(0.5);
 
-                await context.BulkInsertAsync(priceGroups, options => options.AutoMapOutputDirection = false);
+                context.BulkInsert(priceGroups, options => options.SetOutputIdentity = false);
             }
         }
 

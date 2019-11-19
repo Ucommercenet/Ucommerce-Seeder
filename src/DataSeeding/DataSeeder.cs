@@ -28,7 +28,7 @@ namespace Ucommerce.Seeder.DataSeeding
         // If the truncate option has been specified, the tasks will truncate each their tables
         // in reverse seeding order.
         //
-        public async Task Seed(Func<UmbracoDbContext> dbContextFactory)
+        public void Seed(Func<UmbracoDbContext> dbContextFactory)
         {
             var masterStopwatch = new Stopwatch();
             masterStopwatch.Start();
@@ -74,7 +74,7 @@ namespace Ucommerce.Seeder.DataSeeding
 
                 foreach (var task in seedingTasks)
                 {
-                    await task.Seed(context);
+                    task.Seed(context);
                 }
             }
 
