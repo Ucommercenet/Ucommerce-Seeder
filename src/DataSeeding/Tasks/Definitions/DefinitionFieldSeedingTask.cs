@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
@@ -36,17 +38,17 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.DisplayName, f => f.Lorem.Word());
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             var definitionIds = context.UCommerceDefinition.Select(x => x.DefinitionId).ToArray();
             var dataTypeIds = context.UCommerceDataType.Select(x => x.DataTypeId).ToArray();
 
-            var fields = await GenerateFields(context, definitionIds, dataTypeIds);
+            var fields = GenerateFields(context, definitionIds, dataTypeIds);
 
-            await GenerateDescriptions(context, fields);
+            GenerateDescriptions(context, fields);
         }
 
-        private async Task GenerateDescriptions(UmbracoDbContext context, UCommerceDefinitionField[] fields)
+        private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceDefinitionField> fields)
         {
             Console.Write($"Generating descriptions for {Count:N0} definition fields. ");
             using (var p = new ProgressBar())
@@ -61,20 +63,20 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     )
                 );
                 p.Report(0.5);
-                await context.BulkInsertAsync(descriptions, options => options.AutoMapOutputDirection = false);
+                context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
             }
         }
 
-        private async Task<UCommerceDefinitionField[]> GenerateFields(UmbracoDbContext context, int[] definitionIds,
+        private List<UCommerceDefinitionField> GenerateFields(UmbracoDbContext context, int[] definitionIds,
             int[] dataTypeIds)
         {
             Console.Write($"Generating {Count:N0} definition fields. ");
             using (var p = new ProgressBar())
             {
-                var fields = GeneratorHelper.Generate(() => GenerateField(definitionIds, dataTypeIds), Count);
+                var fields = GeneratorHelper.Generate(() => GenerateField(definitionIds, dataTypeIds), Count).ToList();
                 fields.ConsecutiveSortOrder((f, v) => { f.SortOrder = (int) v; });
                 p.Report(0.5);
-                await context.BulkInsertAsync(fields);
+                context.BulkInsert(fields);
                 return fields;
             }
         }

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
@@ -9,7 +10,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
 {
     public class OrderNumberSeriesSeedingTask : DataSeedingTaskBase
     {
-        private Faker<UCommerceOrderNumberSerie> _faker;
+        private readonly Faker<UCommerceOrderNumberSerie> _faker;
 
         public OrderNumberSeriesSeedingTask(uint count) : base(count)
         {
@@ -23,7 +24,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .RuleFor(x => x.OrderNumberName, f => f.Company.CatchPhrase());
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             Console.Write($"Generating {Count:N0} order number series. ");
             using (var p = new ProgressBar())
@@ -32,7 +33,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 var orderNumberSeries =
                     GeneratorHelper.Generate(() => _faker.Generate(), Count);
                 p.Report(0.5);
-                await context.BulkInsertAsync(orderNumberSeries);
+                context.BulkInsert(orderNumberSeries);
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
@@ -20,7 +21,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f));
         }
         
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             Console.Write($"Generating {Count} currencies. ");
             using (var p = new ProgressBar())
@@ -34,7 +35,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         .DistinctBy(x => x.Isocode);
 
                 p.Report(0.5);
-                await context.BulkInsertAsync(currencies, options => options.AutoMapOutputDirection = false);
+                context.BulkInsert(currencies.ToList(), options => options.SetOutputIdentity = false);
             }
         }
 

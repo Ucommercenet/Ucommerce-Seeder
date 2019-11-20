@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -26,7 +28,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             public int ProductDefinitionId { get; set; }
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var productDefinitionFields = LookupProductDefinitionFields(context, true);
@@ -41,31 +43,31 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var mediaIds = _cmsContent.GetAllMediaIds(context);
             var contentIds = _cmsContent.GetAllMediaIds(context);
 
-            var products = await GenerateVariants(context, productFamilyIds, mediaIds);
+            var products = GenerateVariants(context, productFamilyIds, mediaIds);
 
-            await GenerateDescriptions(context, languageCodes, products);
+            GenerateDescriptions(context, languageCodes, products);
 
-            await GenerateProperties(context, products, productDefinitionFields, mediaIds, contentIds);
+            GenerateProperties(context, products, productDefinitionFields, mediaIds, contentIds);
 
-            await GeneratePrices(context, priceGroupIds, products);
+            GeneratePrices(context, priceGroupIds, products);
         }
 
-        protected async Task<UCommerceProduct[]> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products, string[] mediaIds)
+        protected IList<UCommerceProduct> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products, string[] mediaIds)
         {
             Console.Write($"Generating {Count:N0} {EntityNamePlural}. ");
             using (var p = new ProgressBar())
             {
                 var variants =
                     GeneratorHelper.Generate(() => GenerateVariant(mediaIds, products),
-                        Count).ToArray();
+                        Count).ToList();
 
                 p.Report(0.5);
-                await context.BulkInsertAsync(variants, options => options.BatchSize = 100_000);
+                context.BulkInsert(variants, options => options.SetOutputIdentity = true);
                 return variants;
             }
         }
 
-        private UCommerceProduct GenerateVariant(string[] mediaIds, ProductWithDefinition[] products)
+        private UCommerceProduct GenerateVariant(string[] mediaIds, IEnumerable<ProductWithDefinition> products)
         {
             var productFamily = _faker.PickRandom(products);
             var product = _productFaker

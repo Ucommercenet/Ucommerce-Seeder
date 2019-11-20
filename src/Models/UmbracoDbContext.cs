@@ -5252,6 +5252,8 @@ namespace Ucommerce.Seeder.Models
             {
                 entity.ToTable("umbracoNode");
 
+                entity.HasKey(e => e.Id);
+
                 entity.HasIndex(e => e.NodeObjectType)
                     .HasName("IX_umbracoNode_ObjectType");
 

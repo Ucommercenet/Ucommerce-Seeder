@@ -32,6 +32,15 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
             }
         }
 
+        public static void EachWithIndex<T>(this IEnumerable<T> collection, Action<T, uint> action)
+        {
+            uint index = 0;
+            foreach (var item in collection)
+            {
+                action(item, index++);
+            }
+        }
+
         public static IEnumerable<T> DistinctBy<T, T2>(this IEnumerable<T> collection, Func<T, T2> selector)
         {
             HashSet<T2> seen = new HashSet<T2>();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -23,7 +24,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.Guid, f => f.Random.Guid());
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             Console.Write($"Generating {Count:N0} product definitions. ");
             using (var p = new ProgressBar())
@@ -32,7 +33,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 p.Report(0.33);
                 productDefinitions.ConsecutiveSortOrder((def, val) => { def.SortOrder = (int) val; });
                 p.Report(0.66);
-                await context.BulkInsertAsync(productDefinitions, options => options.AutoMapOutputDirection = false);
+                context.BulkInsert(productDefinitions, options => options.SetOutputIdentity = false);
             }
 
         }
@@ -41,6 +42,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
         {
             return _productDefinitionFaker.Generate();
         }
-       
     }
 }

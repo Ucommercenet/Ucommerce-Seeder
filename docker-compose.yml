@@ -12,7 +12,7 @@ services:
       - ./db:/etc/seeder/db
 
   dotnetcore:
-    image: mcr.microsoft.com/dotnet/core/sdk:2.2
+    image: mcr.microsoft.com/dotnet/core/sdk:3.0
     links:
       - mssql
     volumes:

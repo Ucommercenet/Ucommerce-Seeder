@@ -1,25 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
         <AssemblyName>uceed</AssemblyName>
-        <LangVersion>7.3</LangVersion>
+        <LangVersion>8</LangVersion>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Bogus" Version="28.2.1" />
-      <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.6">
+      <PackageReference Include="EFCore.BulkExtensions" Version="3.0.3" />
+      <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.4.4" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0-preview9.19423.4" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
       <PackageReference Include="System.Data.Common" Version="4.3.0" />
-      <PackageReference Include="System.Data.SqlClient" Version="4.6.1" />
-      <PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="2.7.15" />
+      <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
     </ItemGroup>
 
     <ItemGroup>

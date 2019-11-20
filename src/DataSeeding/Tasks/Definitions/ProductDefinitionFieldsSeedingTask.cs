@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
@@ -35,14 +36,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.DisplayName, f => f.Lorem.Word());
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
-            var fields = await GenerateDefinitionFields(context);
-            await GenerateFieldDescriptions(context, fields);
+            var fields = GenerateDefinitionFields(context);
+            GenerateFieldDescriptions(context, fields);
         }
 
 
-        private async Task<UCommerceProductDefinitionField[]> GenerateDefinitionFields(UmbracoDbContext context)
+        private List<UCommerceProductDefinitionField> GenerateDefinitionFields(UmbracoDbContext context)
         {
             Console.Write($"Generating {Count:N0} product definition fields. ");
             using (var p = new ProgressBar())
@@ -56,13 +57,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 var oneHalfProductFamiliyDefinitionIds =
                     allProductDefinitionIds.Skip(allProductDefinitionIds.Count / 2).ToList();
 
-                UCommerceProductDefinitionField[] familyDefinitionFields = GeneratorHelper.Generate(
-                    () => GenerateDefinitionFieldForFamily(oneHalfProductFamiliyDefinitionIds, dataTypeIds), Count / 2);
+                var familyDefinitionFields = GeneratorHelper.Generate(
+                    () => GenerateDefinitionFieldForFamily(oneHalfProductFamiliyDefinitionIds, dataTypeIds), Count / 2).ToList();
                 
-                UCommerceProductDefinitionField[] definitionFields = GeneratorHelper.Generate(
-                    () => GenerateDefinitionFieldForNonFamily(oneHalfProductDefinitionIds, dataTypeIds), Count / 2);
+                var definitionFields = GeneratorHelper.Generate(
+                    () => GenerateDefinitionFieldForNonFamily(oneHalfProductDefinitionIds, dataTypeIds), Count / 2).ToList();
 
-                var allFields = familyDefinitionFields.Concat(definitionFields).ToArray();
+                var allFields = familyDefinitionFields.Concat(definitionFields).ToList();
                 p.Report(0.25);
 
                 allFields.ConsecutiveSortOrder((f, v) => { f.SortOrder = (int) v; });
@@ -71,16 +72,17 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 allFields = allFields
                     .Where(f => f.Name != "name")
                     .DistinctBy(f => new CompositeKey {Key1 = f.Name.GetHashCode(), Key2 = f.ProductDefinitionId})
-                    .ToArray();
+                    .ToList();
+                
                 p.Report(0.75);
-                await context.BulkInsertAsync(allFields);
+                context.BulkInsert(allFields, options => options.SetOutputIdentity = true);
                 return allFields;
             }
         }
 
-        private async Task GenerateFieldDescriptions(UmbracoDbContext context, UCommerceProductDefinitionField[] fields)
+        private void GenerateFieldDescriptions(UmbracoDbContext context, IEnumerable<UCommerceProductDefinitionField> fields)
         {
-            Console.Write($"Generating descriptions for {fields.Length:N0} product definition fields. ");
+            Console.Write($"Generating descriptions for {fields.Count():N0} product definition fields. ");
             using (var p = new ProgressBar())
             {
                 var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
@@ -91,9 +93,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                             .RuleFor(x => x.CultureCode, f => language)
                             .Generate()
                     )
-                );
+                ).ToList();
                 p.Report(0.5);
-                await context.BulkInsertAsync(descriptions, options => options.AutoMapOutputDirection = false);
+                context.BulkInsert(descriptions, options => options.SetOutputIdentity = true);
             }
         }
 

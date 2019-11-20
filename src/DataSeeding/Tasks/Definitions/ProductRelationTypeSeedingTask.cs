@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Bogus;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -23,14 +24,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.Name, f => f.Commerce.ProductAdjective());
         }
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             Console.Write($"Generating {Count:N0} product relation types. ");
             using (var p = new ProgressBar())
             {
                 var dataTypes = GeneratorHelper.Generate(Generate, Count);
                 p.Report(0.5);
-                await context.BulkInsertAsync(dataTypes, options => options.AutoMapOutputDirection = false);
+                context.BulkInsert(dataTypes, options => options.SetOutputIdentity = false);
             }
         }
 
@@ -38,6 +39,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
         {
             return _productRelationTypeFaker.Generate();
         }
-        
     }
 }

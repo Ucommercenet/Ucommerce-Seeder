@@ -1,17 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime;
 using System.Threading.Tasks;
 using Bogus;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Internal;
-using Remotion.Linq.Parsing.Structure.IntermediateModel;
+using EFCore.BulkExtensions;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
-using Z.BulkOperations;
 
 // ReSharper disable ReplaceWithSingleCallToAny
 // ReSharper disable ReplaceWithSingleCallToFirst
@@ -75,7 +70,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
         protected virtual string EntityNamePlural => "products";
 
-        public override async Task Seed(UmbracoDbContext context)
+        public override void Seed(UmbracoDbContext context)
         {
             var productDefinitionIds = context.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToArray();
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
@@ -86,19 +81,19 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var mediaIds = _cmsContent.GetAllMediaIds(context);
             var contentIds = _cmsContent.GetAllMediaIds(context);
 
-            var products = await GenerateProducts(context, productDefinitionIds, languageCodes, mediaIds);
+            var products = GenerateProducts(context, productDefinitionIds, languageCodes, mediaIds);
 
-            await GenerateDescriptions(context, languageCodes, products);
+            GenerateDescriptions(context, languageCodes, products);
 
-            await GenerateProperties(context, products, productDefinitionFields, mediaIds,
+            GenerateProperties(context, products, productDefinitionFields, mediaIds,
                 contentIds);
 
-            await GeneratePrices(context, priceGroupIds, products);
+            GeneratePrices(context, priceGroupIds, products);
 
-            await GenerateRelations(context, products, productRelationTypeIds);
+            GenerateRelations(context, products, productRelationTypeIds);
         }
 
-        private async Task GenerateRelations(UmbracoDbContext context, UCommerceProduct[] products,
+        private void GenerateRelations(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
             int[] productRelationTypeIds)
         {
             Console.Write(
@@ -124,16 +119,16 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     .DistinctBy(a => a.UniqueIndex())
                     .Batch(batchSize);
 
-                await relationBatches.EachWithIndexAsync(async (relations, index) =>
+                relationBatches.EachWithIndex((relations, index) =>
                 {
-                    await context.BulkInsertAsync(relations, options => options.AutoMapOutputDirection = false);
+                    context.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        protected async Task GeneratePrices(UmbracoDbContext context, int[] priceGroupIds,
-            UCommerceProduct[] products)
+        protected void GeneratePrices(UmbracoDbContext context, int[] priceGroupIds,
+            IEnumerable<UCommerceProduct> products)
         {
             ulong totalCount = Count * (ulong) priceGroupIds.Length * _databaseSize.TiersPerPriceGroup;
             uint batchSize = 1_00_000;
@@ -163,9 +158,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 uint batchCount = 0;
                 foreach (var batch in priceBatches.Zip(productBatches, (prices, moreInfo) => new {prices, moreInfo}))
                 {
-                    var prices = batch.prices.ToArray();
-                    await context.BulkInsertAsync(prices,
-                        options => { options.AutoMapOutputDirection = true; });
+                    var prices = batch.prices.ToList();
+                    context.BulkInsert(prices,
+                        options => options.SetOutputIdentity = true );
 
                     p.Report(1.0 * ++batchCount / numBatches);
 
@@ -174,14 +169,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         GenerateProductPrice(zippedBatch.price.PriceId, zippedBatch.product.Product.ProductId,
                             zippedBatch.product.Tier)).ToArray();
 
-                    await context.BulkInsertAsync(productPrices,
+                    context.BulkInsert(productPrices,
                         options =>
                         {
-                            options.AutoMapOutputDirection = false;
+                            options.SetOutputIdentity = false;
                             // Specifying the columns to insert is necessary for this table only.
                             // The reason is unknown, but if you omit it, MinimumQuantity will always be '1'.
-                            options.ColumnInputExpression =
-                                x => new {x.MinimumQuantity, x.Guid, x.ProductId, x.PriceId};
+                            options.PropertiesToInclude = new [] { "MinimumQuantity", "Guid", "ProductId", "PriceId"}.ToList();
                         });
 
                     p.Report(1.0 * ++batchCount / numBatches);
@@ -189,8 +183,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        protected async Task GenerateDescriptions(UmbracoDbContext context,
-            string[] languageCodes, UCommerceProduct[] products)
+        protected void GenerateDescriptions(UmbracoDbContext context,
+            string[] languageCodes, IEnumerable<UCommerceProduct> products)
         {
             Console.Write(
                 $"Generating {(Count * languageCodes.Length):N0} descriptions for {Count:N0} {EntityNamePlural} with  {languageCodes.Length:N0} languages. ");
@@ -202,16 +196,16 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     languageCodes.Select(language => GenerateDescription(product.ProductId, language))
                 ).Batch(batchSize);
 
-                await descriptionBatches.EachWithIndexAsync(async (descriptions, index) =>
+                descriptionBatches.EachWithIndex((descriptions, index) =>
                     {
-                        await context.BulkInsertAsync(descriptions);
+                        context.BulkInsert(descriptions.ToList(), p => p.SetOutputIdentity = false);
                         p.Report(1.0 * index / estimatedBatchCount);
                     }
                 );
             }
         }
 
-        protected async Task GenerateProperties(UmbracoDbContext context, UCommerceProduct[] products,
+        protected void GenerateProperties(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
             ILookup<int, ProductDefinitionFieldEditorAndEnum> productDefinitionFields, string[] mediaIds,
             string[] contentIds)
         {
@@ -222,7 +216,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             uint estimatedBatchCount = 1 + Count * averageNumberOfFieldsPerProduct / batchSize;
 
             Console.Write(
-                $"Generating ~{averageNumberOfFieldsPerProduct * products.Length:N0} language variant properties with values for {products.Length:N0} {EntityNamePlural}. ");
+                $"Generating ~{averageNumberOfFieldsPerProduct * products.Count():N0} language variant properties with values for {products.Count():N0} {EntityNamePlural}. ");
 
             using (var p = new ProgressBar())
             {
@@ -235,16 +229,16 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                             productDefinitionFields[product.ProductDefinitionId], mediaIds, contentIds))
                     .Batch(batchSize);
 
-                await languageVariantPropertyBatches.EachWithIndexAsync(async (languageVariantProperties, index) =>
+                languageVariantPropertyBatches.EachWithIndex((languageVariantProperties, index) =>
                 {
-                    await context.BulkInsertAsync(languageVariantProperties,
-                        options => options.AutoMapOutputDirection = false);
+                    context.BulkInsert(languageVariantProperties.ToList(),
+                        options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / estimatedBatchCount);
                 });
             }
 
             Console.Write(
-                $"Generating ~{averageNumberOfFieldsPerProduct * products.Length:N0} language invariant properties with values for {products.Length:N0} {EntityNamePlural}. ");
+                $"Generating ~{averageNumberOfFieldsPerProduct * products.Count():N0} language invariant properties with values for {products.Count():N0} {EntityNamePlural}. ");
             using (var p = new ProgressBar())
             {
                 var simplePropertyBatches = products.SelectMany(product =>
@@ -252,15 +246,15 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                             productDefinitionFields[product.ProductDefinitionId], mediaIds, contentIds))
                     .Batch(batchSize);
 
-                await simplePropertyBatches.EachWithIndexAsync(async (simpleProperties, index) =>
+                simplePropertyBatches.EachWithIndex((simpleProperties, index) =>
                 {
-                    await context.BulkInsertAsync(simpleProperties, options => options.AutoMapOutputDirection = false);
+                    context.BulkInsert(simpleProperties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / estimatedBatchCount);
                 });
             }
         }
 
-        protected async Task<UCommerceProduct[]> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
+        protected List<UCommerceProduct> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
             string[] languageCodes, string[] mediaIds)
         {
             Console.Write($"Generating {Count:N0} products. ");
@@ -270,9 +264,11 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
                         Count)
                         .DistinctBy(x => x.UniqueIndex())
-                        .ToArray();
+                        .ToList();
+                
                 p.Report(0.5);
-                await context.BulkInsertAsync(products, options => options.BatchSize = 100_000);
+                
+                context.BulkInsert(products, options => options.SetOutputIdentity = true);
                 return products;
             }
         }
