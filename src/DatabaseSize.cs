@@ -56,26 +56,26 @@ namespace Ucommerce.Seeder
 
         public static readonly DatabaseSize Huge = new DatabaseSize
         {
-            DataTypes = 50,
-            ProductDefinitions = 100,
-            Definitions = 100,
+            DataTypes = 0,
+            ProductDefinitions = 50,
+            Definitions = 50,
             ProductRelationTypes = 20,
             OrderNumberSeries = 20,
 
-            AverageUserDefinedFieldsPerDefinition = 200,
+            AverageUserDefinedFieldsPerDefinition = 20,
 
             Languages = 20,
-            Currencies = 100,
-            PriceGroups = 3_000,
-            TiersPerPriceGroup = 5,
+            Currencies = 50,
+            PriceGroups = 1_000,
+            TiersPerPriceGroup = 3,
 
-            Products = 4000000,
-            AverageVariantsPerProduct = 8,
+            Products = 4_000_000,
+            AverageVariantsPerProduct = 5,
             ProductRelationsPerProduct = 10,
 
-            Stores = 1_000,
+            Stores = 100,
             CatalogsPerStore = 30,
-            CategoriesPerCatalog = 1_000,
+            CategoriesPerCatalog = 250,
             AverageProductsPerCategory = 1000,
             
             CmsMediaFolders = 100,
