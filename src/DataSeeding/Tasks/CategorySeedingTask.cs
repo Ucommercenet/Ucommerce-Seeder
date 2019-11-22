@@ -66,58 +66,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GenerateProperties(context, definitionIds, categories, languageCodes, mediaIds);
         }
 
-
-        private void GenerateProperties(UmbracoDbContext context, int[] definitionIds,
-            IEnumerable<UCommerceCategory> categories,
-            string[] languageCodes, string[] mediaIds)
-        {
-            var definitionFields = LookupDefinitionFields(context, definitionIds);
-            uint estimatedPropertyCount = definitionFields.Any() ? (uint) definitionFields.Average(x => x.Count()) * (uint) categories.Count() : 1;
-            uint batchSize = 1_000_000;
-            uint numberOfBatches = 1 + estimatedPropertyCount / batchSize;
-
-            Console.Write($"Generating ~{estimatedPropertyCount:N0} properties for {categories.Count():N0} categories. ");
-            using (var p = new ProgressBar())
-            {
-                var contentIds = _cmsContent.GetAllContentIds(context);
-
-                var propertyBatches = categories.SelectMany(category =>
-                        definitionFields[category.DefinitionId].SelectMany(field =>
-                            AddCategoryProperty(category.CategoryId, field.Field, languageCodes,
-                                mediaIds, contentIds, field.Editor, field.Enums)))
-                    .Batch(batchSize);
-
-                propertyBatches.EachWithIndex((properties, index) =>
-                {
-                    context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
-                    p.Report(1.0 * index / numberOfBatches);
-                });
-            }
-        }
-
-        private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceCategory> categories,
-            string[] languageCodes)
-        {
-            uint batchSize = 100_000;
-            uint numberOfBatches = (uint) categories.Count() * (uint) languageCodes.Length / batchSize; 
-            Console.Write($"Generating {categories.Count() * languageCodes.Length:N0} descriptions for {categories.Count():N0} categories in batches of {batchSize:N0}. ");
-            using (var p = new ProgressBar())
-            {
-                var descriptionBatches = categories.SelectMany(category =>
-                    languageCodes.Select(language => _descriptionFaker
-                        .RuleFor(x => x.CultureCode, f => language)
-                        .RuleFor(x => x.CategoryId, f => category.CategoryId)
-                        .Generate()
-                    )).Batch(batchSize);
-
-                descriptionBatches.EachWithIndex((descriptions, index) =>
-                {
-                    context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
-                    p.Report(1.0 * index / numberOfBatches);
-                });
-            }
-        }
-
+        
         private List<UCommerceCategory> GenerateCategories(UmbracoDbContext context, int[] definitionIds,
             int[] catalogIds, string[] mediaIds)
         {
@@ -167,6 +116,58 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 });
                 
                 return insertedCategories;
+            }
+        }
+
+
+        private void GenerateProperties(UmbracoDbContext context, int[] definitionIds,
+            IEnumerable<UCommerceCategory> categories,
+            string[] languageCodes, string[] mediaIds)
+        {
+            var definitionFields = LookupDefinitionFields(context, definitionIds);
+            uint estimatedPropertyCount = definitionFields.Any() ? (uint) definitionFields.Average(x => x.Count()) * (uint) categories.Count() : 1;
+            uint batchSize = 1_000_000;
+            uint numberOfBatches = 1 + estimatedPropertyCount / batchSize;
+
+            Console.Write($"Generating ~{estimatedPropertyCount:N0} properties for {categories.Count():N0} categories. ");
+            using (var p = new ProgressBar())
+            {
+                var contentIds = _cmsContent.GetAllContentIds(context);
+
+                var propertyBatches = categories.SelectMany(category =>
+                        definitionFields[category.DefinitionId].SelectMany(field =>
+                            AddCategoryProperty(category.CategoryId, field.Field, languageCodes,
+                                mediaIds, contentIds, field.Editor, field.Enums)))
+                    .Batch(batchSize);
+
+                propertyBatches.EachWithIndex((properties, index) =>
+                {
+                    context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
+            }
+        }
+
+        private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceCategory> categories,
+            string[] languageCodes)
+        {
+            uint batchSize = 100_000;
+            uint numberOfBatches = (uint) categories.Count() * (uint) languageCodes.Length / batchSize; 
+            Console.Write($"Generating {categories.Count() * languageCodes.Length:N0} descriptions for {categories.Count():N0} categories in batches of {batchSize:N0}. ");
+            using (var p = new ProgressBar())
+            {
+                var descriptionBatches = categories.SelectMany(category =>
+                    languageCodes.Select(language => _descriptionFaker
+                        .RuleFor(x => x.CultureCode, f => language)
+                        .RuleFor(x => x.CategoryId, f => category.CategoryId)
+                        .Generate()
+                    )).Batch(batchSize);
+
+                descriptionBatches.EachWithIndex((descriptions, index) =>
+                {
+                    context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
             }
         }
 

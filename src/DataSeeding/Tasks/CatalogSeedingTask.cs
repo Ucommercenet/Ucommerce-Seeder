@@ -54,6 +54,24 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GenerateAllowedPriceGroups(context, catalogs, priceGroupIds);
         }
 
+        private List<UCommerceProductCatalog> GenerateCatalogs(UmbracoDbContext context, int[] definitionIds,
+            int[] priceGroupIds)
+        {
+            Console.Write($"Generating {Count:N0} catalogs. ");
+            using (var p = new ProgressBar())
+            {
+                var storeIds = context.UCommerceProductCatalogGroup.Select(c => c.ProductCatalogGroupId).ToArray();
+                var catalogs =
+                    GeneratorHelper.Generate(() => GenerateCatalog(definitionIds, storeIds, priceGroupIds), Count)
+                        .DistinctBy(a => a.UniqueIndex())
+                        .ToList();
+
+                p.Report(0.5);
+                context.BulkInsert(catalogs, options => options.SetOutputIdentity = true);
+                return catalogs;
+            }
+        }
+
         private void GenerateAllowedPriceGroups(UmbracoDbContext context, IEnumerable<UCommerceProductCatalog> catalogs,
             int[] priceGroupIds)
         {
@@ -92,7 +110,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 uint batchSize = 100_000;
                 uint numberOfBatches = definitionFields.Any() ? (uint) (1 + batchSize / definitionFields.Average(x => x.Count()) / catalogs.Count()) : 1;
                 
-                var propertiyBatches = catalogs
+                var propertyBatches = catalogs
                     .Where(catalog => catalog.DefinitionId.HasValue)
                     // ReSharper disable once PossibleInvalidOperationException
                     .SelectMany(category => definitionFields[category.DefinitionId.Value].SelectMany(field =>
@@ -100,7 +118,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                             contentIds, field.Editor, field.Enums)))
                     .Batch(batchSize);
 
-                propertiyBatches.EachWithIndex((properties, index) =>
+                propertyBatches.EachWithIndex((properties, index) =>
                 {
                     context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
@@ -128,24 +146,6 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
-            }
-        }
-
-        private List<UCommerceProductCatalog> GenerateCatalogs(UmbracoDbContext context, int[] definitionIds,
-            int[] priceGroupIds)
-        {
-            Console.Write($"Generating {Count:N0} catalogs. ");
-            using (var p = new ProgressBar())
-            {
-                var storeIds = context.UCommerceProductCatalogGroup.Select(c => c.ProductCatalogGroupId).ToArray();
-                var catalogs =
-                    GeneratorHelper.Generate(() => GenerateCatalog(definitionIds, storeIds, priceGroupIds), Count)
-                        .DistinctBy(a => a.UniqueIndex())
-                        .ToList();
-
-                p.Report(0.5);
-                context.BulkInsert(catalogs, options => options.SetOutputIdentity = true);
-                return catalogs;
             }
         }
 

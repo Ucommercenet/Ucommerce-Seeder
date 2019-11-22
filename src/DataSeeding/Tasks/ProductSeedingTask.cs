@@ -92,37 +92,82 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
             GenerateRelations(context, products, productRelationTypeIds);
         }
-
-        private void GenerateRelations(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
-            int[] productRelationTypeIds)
+        
+        protected List<UCommerceProduct> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
+            string[] languageCodes, string[] mediaIds)
         {
-            Console.Write(
-                $"Generating {_databaseSize.ProductRelationsPerProduct * Count:N0} relations for {Count:N0} {EntityNamePlural}. ");
+            uint batchSize = 100_000;
+            uint numberOfBatches = Count / batchSize;
+            var inserted = new List<UCommerceProduct>((int)Count);
+
+            Console.Write($"Generating {Count:N0} products in batches of {batchSize:N0}. ");
+            
             using (var p = new ProgressBar())
             {
-                uint batchSize = 100_000;
-                uint numberOfBatches = 1 + _databaseSize.ProductRelationsPerProduct * Count / batchSize;
+                var productBatches =
+                    GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
+                            Count)
+                        .DistinctBy(x => x.UniqueIndex())
+                        .Batch(batchSize);
+                
+                productBatches.EachWithIndex((products, index) =>
+                {
+                    var listOfProducts = products.ToList();
+                    context.BulkInsert(listOfProducts, options => options.SetOutputIdentity = true);
+                    inserted.AddRange(listOfProducts);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
+                
+                return inserted;
+            }
+        }
 
-                var relationBatches = products.SelectMany(product => Enumerable.Range(1,
-                        (int) _databaseSize.ProductRelationsPerProduct).Select(i =>
-                    {
-                        var otherProduct = _faker.PickRandom(products);
-                        if (otherProduct != product)
-                        {
-                            return GenerateProductRelation(product.ProductId, otherProduct.ProductId,
-                                productRelationTypeIds);
-                        }
+        
+        protected void GenerateProperties(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
+            ILookup<int, ProductDefinitionFieldEditorAndEnum> productDefinitionFields, string[] mediaIds,
+            string[] contentIds)
+        {
+            uint averageNumberOfFieldsPerProduct = productDefinitionFields.Any()
+                ? (uint) productDefinitionFields.Average(f => f.Count()) / 2
+                : 1;
+            uint batchSize = 1_000_000;
+            uint estimatedBatchCount = 1 + Count * averageNumberOfFieldsPerProduct / batchSize;
 
-                        return null;
-                    }))
-                    .Compact()
-                    .DistinctBy(a => a.UniqueIndex())
+            Console.Write(
+                $"Generating ~{averageNumberOfFieldsPerProduct * products.Count():N0} language variant properties with values for {products.Count():N0} {EntityNamePlural}. ");
+
+            using (var p = new ProgressBar())
+            {
+                ILookup<int, int> descriptions = context.UCommerceProductDescription
+                    .Select(x => new {x.ProductId, x.ProductDescriptionId})
+                    .ToLookup(x => x.ProductId, x => x.ProductDescriptionId);
+
+                var languageVariantPropertyBatches = products.SelectMany(product =>
+                        GenerateLanguageVariantProductProperties(descriptions[product.ProductId],
+                            productDefinitionFields[product.ProductDefinitionId], mediaIds, contentIds))
                     .Batch(batchSize);
 
-                relationBatches.EachWithIndex((relations, index) =>
+                languageVariantPropertyBatches.EachWithIndex((languageVariantProperties, index) =>
                 {
-                    context.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
-                    p.Report(1.0 * index / numberOfBatches);
+                    context.BulkInsert(languageVariantProperties.ToList(),
+                        options => options.SetOutputIdentity = false);
+                    p.Report(1.0 * index / estimatedBatchCount);
+                });
+            }
+
+            Console.Write(
+                $"Generating ~{averageNumberOfFieldsPerProduct * products.Count():N0} language invariant properties with values for {products.Count():N0} {EntityNamePlural}. ");
+            using (var p = new ProgressBar())
+            {
+                var simplePropertyBatches = products.SelectMany(product =>
+                        GenerateLanguageInvariantProductProperties(product.ProductId,
+                            productDefinitionFields[product.ProductDefinitionId], mediaIds, contentIds))
+                    .Batch(batchSize);
+
+                simplePropertyBatches.EachWithIndex((simpleProperties, index) =>
+                {
+                    context.BulkInsert(simpleProperties.ToList(), options => options.SetOutputIdentity = false);
+                    p.Report(1.0 * index / estimatedBatchCount);
                 });
             }
         }
@@ -205,73 +250,41 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        protected void GenerateProperties(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
-            ILookup<int, ProductDefinitionFieldEditorAndEnum> productDefinitionFields, string[] mediaIds,
-            string[] contentIds)
+
+        private void GenerateRelations(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
+            int[] productRelationTypeIds)
         {
-            uint averageNumberOfFieldsPerProduct = productDefinitionFields.Any()
-                ? (uint) productDefinitionFields.Average(f => f.Count()) / 2
-                : 1;
-            uint batchSize = 1_000_000;
-            uint estimatedBatchCount = 1 + Count * averageNumberOfFieldsPerProduct / batchSize;
-
             Console.Write(
-                $"Generating ~{averageNumberOfFieldsPerProduct * products.Count():N0} language variant properties with values for {products.Count():N0} {EntityNamePlural}. ");
-
+                $"Generating {_databaseSize.ProductRelationsPerProduct * Count:N0} relations for {Count:N0} {EntityNamePlural}. ");
             using (var p = new ProgressBar())
             {
-                ILookup<int, int> descriptions = context.UCommerceProductDescription
-                    .Select(x => new {x.ProductId, x.ProductDescriptionId})
-                    .ToLookup(x => x.ProductId, x => x.ProductDescriptionId);
+                uint batchSize = 100_000;
+                uint numberOfBatches = 1 + _databaseSize.ProductRelationsPerProduct * Count / batchSize;
 
-                var languageVariantPropertyBatches = products.SelectMany(product =>
-                        GenerateLanguageVariantProductProperties(descriptions[product.ProductId],
-                            productDefinitionFields[product.ProductDefinitionId], mediaIds, contentIds))
+                var relationBatches = products.SelectMany(product => Enumerable.Range(1,
+                        (int) _databaseSize.ProductRelationsPerProduct).Select(i =>
+                    {
+                        var otherProduct = _faker.PickRandom(products);
+                        if (otherProduct != product)
+                        {
+                            return GenerateProductRelation(product.ProductId, otherProduct.ProductId,
+                                productRelationTypeIds);
+                        }
+
+                        return null;
+                    }))
+                    .Compact()
+                    .DistinctBy(a => a.UniqueIndex())
                     .Batch(batchSize);
 
-                languageVariantPropertyBatches.EachWithIndex((languageVariantProperties, index) =>
+                relationBatches.EachWithIndex((relations, index) =>
                 {
-                    context.BulkInsert(languageVariantProperties.ToList(),
-                        options => options.SetOutputIdentity = false);
-                    p.Report(1.0 * index / estimatedBatchCount);
-                });
-            }
-
-            Console.Write(
-                $"Generating ~{averageNumberOfFieldsPerProduct * products.Count():N0} language invariant properties with values for {products.Count():N0} {EntityNamePlural}. ");
-            using (var p = new ProgressBar())
-            {
-                var simplePropertyBatches = products.SelectMany(product =>
-                        GenerateLanguageInvariantProductProperties(product.ProductId,
-                            productDefinitionFields[product.ProductDefinitionId], mediaIds, contentIds))
-                    .Batch(batchSize);
-
-                simplePropertyBatches.EachWithIndex((simpleProperties, index) =>
-                {
-                    context.BulkInsert(simpleProperties.ToList(), options => options.SetOutputIdentity = false);
-                    p.Report(1.0 * index / estimatedBatchCount);
+                    context.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
+                    p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        protected List<UCommerceProduct> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
-            string[] languageCodes, string[] mediaIds)
-        {
-            Console.Write($"Generating {Count:N0} products. ");
-            using (var p = new ProgressBar())
-            {
-                var products =
-                    GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
-                        Count)
-                        .DistinctBy(x => x.UniqueIndex())
-                        .ToList();
-                
-                p.Report(0.5);
-                
-                context.BulkInsert(products, options => options.SetOutputIdentity = true);
-                return products;
-            }
-        }
 
         protected static ILookup<int, ProductDefinitionFieldEditorAndEnum> LookupProductDefinitionFields(
             UmbracoDbContext context, bool variantProperties)
