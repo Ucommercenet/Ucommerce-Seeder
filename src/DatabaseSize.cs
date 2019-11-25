@@ -66,7 +66,7 @@ namespace Ucommerce.Seeder
 
             Languages = 20,
             Currencies = 50,
-            PriceGroups = 1_000,
+            PriceGroups = 100,
             TiersPerPriceGroup = 3,
 
             Products = 4_000_000,
