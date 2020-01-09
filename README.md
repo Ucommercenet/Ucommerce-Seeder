@@ -106,7 +106,7 @@ Future versions will work with other CMSs.
 
 ## Prerequisites
 
-* .NET Core 2.2
+* [.NET Core 3.0](https://dotnet.microsoft.com/download/dotnet-core/3.0)
 * A SQL Server database with Umbraco 8 and Ucommerce 8 installed.
 
 
@@ -122,7 +122,7 @@ Start with a fresh, clean database with Umbraco 8 and Ucommerce installed. Consi
 ## Use
 
 1. Build the project using Rider, VS or MSBuild
-2. `dotnet bin/dotnetcore2.2/uceed.dll -s:<size> -c:<connectionstring>`
+2. `dotnet bin/Debug/netcoreapp3.0/uceed.dll -s:<size> -c:<connectionstring>`
 
 Size can be `medium`, `large` or `huge`. I know, there's no "small" option; the whole reason for the tool is creating *large databases*.
 
