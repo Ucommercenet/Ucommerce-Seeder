@@ -23,7 +23,7 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
                     BuiltInEditors.EmailContent,
                     (mediaGuids, contentGuids, enumGuids) => _faker.PickRandomOrDefault(contentGuids)
                 },
-                {BuiltInEditors.DateTime, (mediaGuids, contentGuids, enumGuids) => _faker.Date.Recent().ToString()},
+                {BuiltInEditors.Date, (mediaGuids, contentGuids, enumGuids) => _faker.Date.Recent().ToString()},
                 {BuiltInEditors.Boolean, (mediaGuids, contentGuids, enumGuids) => _faker.Random.Bool().ToString()},
                 {
                     BuiltInEditors.ImagePickerMultiSelect,
@@ -58,10 +58,9 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
         {
             if (Enum.TryParse(editor, out BuiltInEditors editorEnum))
             {
-                return _values[editorEnum](mediaGuids, contentGuids, enums);
+                return _values[editorEnum](mediaGuids, contentGuids, enums) ?? "";
             }
-
-            return "";
+            return _faker.Lorem.Word();
         }
     }
 }
