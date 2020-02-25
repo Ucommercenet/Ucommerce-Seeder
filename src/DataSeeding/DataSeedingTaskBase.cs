@@ -66,13 +66,15 @@ namespace Ucommerce.Seeder.DataSeeding
         
         protected ILookup<int, DefinitionFieldEditorAndEnum> LookupDefinitionFields(UmbracoDbContext context, int[] definitionIds)
         {
-            return context.UCommerceDefinitionField
-                .Where(field => definitionIds.Contains(field.DefinitionId))
+            var uCommerceDefinitionFields = context.UCommerceDefinitionField
+                .Where(field => definitionIds.Contains(field.DefinitionId));
+                
+            return uCommerceDefinitionFields
                 .Select(field => new DefinitionFieldEditorAndEnum(field,
-                    field.DataType.Definition.UCommerceDefinitionField.Where(x => x.Name == "Editor").Any() ? field.DataType.Definition.UCommerceDefinitionField.Where(x => x.Name == "Editor").First()
-                        .UCommerceEntityProperty.Where(x => x.EntityId == field.DataType.Guid).Select(x => x.Value).FirstOrDefault() : "",
-                    field.DataType.UCommerceDataTypeEnum.Select(x => x.Guid)))
-                .ToLookup(field => field.Field.DefinitionId);
+                    field.DataType.DefinitionName,
+                    field.DataType.UCommerceDataTypeEnum
+                        .Select(x => x.Guid)))
+                        .ToLookup(field => field.Field.DefinitionId);
         }
     }
 }

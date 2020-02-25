@@ -6,7 +6,7 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
         Media,
         Content,
         EmailContent,
-        DateTime,
+        Date,
         Boolean,
         ImagePickerMultiSelect,
         ShortText,

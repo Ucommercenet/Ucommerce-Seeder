@@ -113,7 +113,7 @@ namespace Ucommerce.Seeder
 
         public static readonly DatabaseSize Medium = new DatabaseSize
         {
-            DataTypes = 0,
+            DataTypes = 5,
             ProductDefinitions = 5,
             Definitions = 10,
             ProductRelationTypes = 3,
