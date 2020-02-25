@@ -26,6 +26,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         {
             public int ProductId { get; set; }
             public int ProductDefinitionId { get; set; }
+
+            public string Sku { get; set; }
         }
 
         public override void Seed(UmbracoDbContext context)
@@ -37,7 +39,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var productFamilyIds = context.UCommerceProduct
                 .Where(p => p.ProductDefinition.UCommerceProductDefinitionField.Any(f => f.IsVariantProperty)) // pick families only
                 .Where(p => p.ParentProductId == null) // don't pick variants
-                .Select(product => new ProductWithDefinition {ProductId = product.ProductId, ProductDefinitionId = product.ProductDefinitionId})
+                .Select(product => new ProductWithDefinition {ProductId = product.ProductId, ProductDefinitionId = product.ProductDefinitionId, Sku = product.Sku})
                 .ToArray();
             
             var mediaIds = _cmsContent.GetAllMediaIds(context);
@@ -76,6 +78,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.PrimaryImageMediaId, f => f.PickRandomOrDefault(mediaIds))
                 .RuleFor(x => x.ThumbnailImageMediaId, f => f.PickRandomOrDefault(mediaIds))
                 .RuleFor(x => x.VariantSku, f => f.Commerce.Ean8())
+                .RuleFor(x => x.Sku, f => productFamily.Sku)
                 .Generate();
 
             return product;
