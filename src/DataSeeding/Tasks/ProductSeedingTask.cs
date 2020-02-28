@@ -278,13 +278,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         {
             return context.UCommerceProductDefinitionField
                 .Where(field => field.IsVariantProperty == variantProperties)
-                .Select(field => new ProductDefinitionFieldEditorAndEnum(field,
-                    field.DataType.Definition.UCommerceDefinitionField.Where(x => x.Name == "Editor").Any()
-                        ? field.DataType.Definition.UCommerceDefinitionField.Where(x => x.Name == "Editor")
-                            .First().UCommerceEntityProperty
-                            .Where(x => x.EntityId == field.DataType.Guid)
-                            .Select(x => x.Value).FirstOrDefault()
-                        : "",
+                .Select(field => new ProductDefinitionFieldEditorAndEnum(field, field.DataType.DefinitionName,
                     field.DataType.UCommerceDataTypeEnum.Select(x => x.Guid)))
                 .ToLookup(field => field.Field.ProductDefinitionId);
         }
