@@ -32,7 +32,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.CreatedOn, f => f.Date.Past())
                 .RuleFor(x => x.ModifiedBy, f => f.Name.FullName())
                 .RuleFor(x => x.ShowPricesIncludingVat, f => f.Random.Bool())
-                .RuleFor(x => x.ModifiedOn, f => f.Date.Recent());
+                .RuleFor(x => x.ModifiedOn, f => f.Date.Recent())
+                .RuleFor(x => x.DisplayOnWebSite, f => f.Random.Bool(0.95f));
 
             _descriptionFaker = new Faker<UCommerceProductCatalogDescription>()
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
