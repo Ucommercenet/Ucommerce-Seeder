@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace Ucommerce.Seeder
 {
     public struct DatabaseSize
@@ -26,30 +27,31 @@ namespace Ucommerce.Seeder
         public uint ProductRelationTypes;
         public uint OrderNumberSeries;
 
-        public static readonly DatabaseSize Realistic = new DatabaseSize
+        public static readonly DatabaseSize Developer = new DatabaseSize
         {
-            DataTypes = 0,
-            ProductDefinitions = 5,
-            Definitions = 5,
-            ProductRelationTypes = 2,
-            OrderNumberSeries = 5,
-            
-            AverageUserDefinedFieldsPerDefinition = 20,
+            DataTypes = 5,
+            ProductDefinitions = 10,
+            Definitions = 10,
+            ProductRelationTypes = 3,
+            OrderNumberSeries = 1,
+
+            AverageUserDefinedFieldsPerDefinition = 5,
 
             Languages = 4,
-            Currencies = 6,
+            Currencies = 5,
             PriceGroups = 5,
-            TiersPerPriceGroup = 2,
+            TiersPerPriceGroup = 1,
 
-            Products = 500_000,
-            AverageVariantsPerProduct = 0,
-            ProductRelationsPerProduct = 5,
+            Products = 20_000,
+            AverageVariantsPerProduct = 5,
+            ProductRelationsPerProduct = 3,
 
-            Stores = 5,
-            CatalogsPerStore = 5,
-            CategoriesPerCatalog = 100,
-            AverageProductsPerCategory = 1_000,
-            
+            Stores = 1,
+            CatalogsPerStore = 1,
+            CategoriesPerCatalog = 250,
+
+            AverageProductsPerCategory = 3000,
+
             CmsMediaFolders = 10,
             CmsImagesPerFolder = 100
         };
@@ -77,11 +79,11 @@ namespace Ucommerce.Seeder
             CatalogsPerStore = 30,
             CategoriesPerCatalog = 1_000,
             AverageProductsPerCategory = 1000,
-            
+
             CmsMediaFolders = 100,
             CmsImagesPerFolder = 1000
         };
-        
+
         public static readonly DatabaseSize Large = new DatabaseSize
         {
             DataTypes = 10,
@@ -104,9 +106,9 @@ namespace Ucommerce.Seeder
             Stores = 10,
             CatalogsPerStore = 20,
             CategoriesPerCatalog = 75,
-            
+
             AverageProductsPerCategory = 125,
-            
+
             CmsMediaFolders = 25,
             CmsImagesPerFolder = 250
         };
@@ -133,9 +135,9 @@ namespace Ucommerce.Seeder
             Stores = 10,
             CatalogsPerStore = 10,
             CategoriesPerCatalog = 50,
-            
+
             AverageProductsPerCategory = 75,
-            
+
             CmsMediaFolders = 10,
             CmsImagesPerFolder = 100
         };
@@ -161,12 +163,11 @@ namespace Ucommerce.Seeder
             Stores = 1,
             CatalogsPerStore = 1,
             CategoriesPerCatalog = 5,
-            
+
             AverageProductsPerCategory = 2,
-            
+
             CmsMediaFolders = 1,
             CmsImagesPerFolder = 1
         };
-
     }
 }
