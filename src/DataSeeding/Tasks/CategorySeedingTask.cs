@@ -28,7 +28,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             _categoryFaker = new Faker<UCommerceCategory>()
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f))
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
-                .RuleFor(x => x.Name, f => $"{f.Commerce.ProductAdjective()} {f.Commerce.ProductMaterial()} {f.Commerce.Product()}")
+                .RuleFor(x => x.Name, f => $"{f.Commerce.ProductAdjective()} {f.Commerce.ProductMaterial()}")
                 .RuleFor(x => x.CreatedBy, f => f.Name.FullName())
                 .RuleFor(x => x.CreatedOn, f => f.Date.Past())
                 .RuleFor(x => x.ModifiedBy, f => f.Name.FullName())
@@ -41,7 +41,6 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             _descriptionFaker = new Faker<UCommerceCategoryDescription>()
                 .RuleFor(x => x.Description, f => f.Lorem.Text())
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
-                .RuleFor(x => x.DisplayName, f => f.Commerce.Product())
                 .RuleFor(x => x.RenderAsContent, f => f.Random.Bool(0.75f));
         }
 
@@ -107,6 +106,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     languageCodes.Select(language => _descriptionFaker
                         .RuleFor(x => x.CultureCode, f => language)
                         .RuleFor(x => x.CategoryId, f => category.CategoryId)
+                        .RuleFor(x => x.DisplayName, f => $"{category.Name} {f.Commerce.Product()}")
                         .Generate()
                     )).Batch(batchSize);
 

@@ -30,8 +30,8 @@ namespace Ucommerce.Seeder
         public static readonly DatabaseSize Developer = new DatabaseSize
         {
             DataTypes = 5,
-            ProductDefinitions = 10,
-            Definitions = 10,
+            ProductDefinitions = 5,
+            Definitions = 5,
             ProductRelationTypes = 3,
             OrderNumberSeries = 1,
 
@@ -42,8 +42,8 @@ namespace Ucommerce.Seeder
             PriceGroups = 5,
             TiersPerPriceGroup = 1,
 
-            Products = 20_000,
-            AverageVariantsPerProduct = 5,
+            Products = 200_000,
+            AverageVariantsPerProduct = 4,
             ProductRelationsPerProduct = 3,
 
             Stores = 1,

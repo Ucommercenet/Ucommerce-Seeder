@@ -35,13 +35,17 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var productDefinitionFields = LookupProductDefinitionFields(context, true);
             var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
-            
+
             var productFamilyIds = context.UCommerceProduct
-                .Where(p => p.ProductDefinition.UCommerceProductDefinitionField.Any(f => f.IsVariantProperty)) // pick families only
+                .Where(p => p.ProductDefinition.UCommerceProductDefinitionField.Any(f =>
+                    f.IsVariantProperty)) // pick families only
                 .Where(p => p.ParentProductId == null) // don't pick variants
-                .Select(product => new ProductWithDefinition {ProductId = product.ProductId, ProductDefinitionId = product.ProductDefinitionId, Sku = product.Sku})
+                .Select(product => new ProductWithDefinition
+                {
+                    ProductId = product.ProductId, ProductDefinitionId = product.ProductDefinitionId, Sku = product.Sku
+                })
                 .ToArray();
-            
+
             var mediaIds = _cmsContent.GetAllMediaIds(context);
             var contentIds = _cmsContent.GetAllMediaIds(context);
 
@@ -54,7 +58,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GeneratePrices(context, priceGroupIds, products);
         }
 
-        protected IList<UCommerceProduct> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products, string[] mediaIds)
+        protected IList<UCommerceProduct> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products,
+            string[] mediaIds)
         {
             Console.Write($"Generating {Count:N0} {EntityNamePlural}. ");
             using (var p = new ProgressBar())
@@ -82,7 +87,21 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .Generate();
 
             return product;
+        }
 
+        protected override UCommerceProductDescription GenerateDescription(UCommerceProduct product,
+            string languageCode)
+        {
+            string parentDisplayName = product.ParentProduct
+                ?.UCommerceProductDescription
+                ?.FirstOrDefault(d => d.CultureCode == languageCode)
+                ?.DisplayName ?? "";
+
+            return _productDescriptionFaker
+                .RuleFor(x => x.CultureCode, f => languageCode)
+                .RuleFor(x => x.DisplayName, f => $"{parentDisplayName} {f.Commerce.Color()}")
+                .RuleFor(x => x.ProductId, f => product.ProductId)
+                .Generate();
         }
     }
 }
