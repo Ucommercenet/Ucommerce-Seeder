@@ -55,7 +55,10 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 var definitionFields = LookupDefinitionFields(context, definitionIds);
 
                 uint batchSize = 100_000;
-                uint numberOfBatches = definitionFields.Any() ? 1 + (uint) stores.Count() * (uint) definitionFields.Average(x => x.Count()) / batchSize : 1;
+                uint numberOfBatches = definitionFields.Any()
+                    ?  (uint) Math.Ceiling(1.0 * stores.Count() * (uint) definitionFields.Average(x => x.Count()) /
+                                           batchSize)
+                    : 1;
 
                 var propertyBatches = stores
                     .Where(store => store.DefinitionId.HasValue)
@@ -82,7 +85,10 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 var orderNumberSeriesIds = context.UCommerceOrderNumberSerie.Select(c => c.OrderNumberId).ToArray();
                 p.Report(0.1);
                 var stores =
-                    GeneratorHelper.Generate(() => GenerateStore(currencyIds, definitionIds, emailProfileIds, orderNumberSeriesIds), Count).ToList();
+                    GeneratorHelper
+                        .Generate(
+                            () => GenerateStore(currencyIds, definitionIds, emailProfileIds, orderNumberSeriesIds),
+                            Count).ToList();
                 p.Report(0.5);
                 context.BulkInsert(stores, options => options.SetOutputIdentity = true);
                 return stores;
@@ -99,6 +105,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.OrderNumberId, f => f.PickRandom(orderNumberSeriesIds))
                 .Generate();
         }
-
     }
 }

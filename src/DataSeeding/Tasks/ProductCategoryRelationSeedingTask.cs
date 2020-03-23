@@ -35,7 +35,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             int[] categoryIds = context.UCommerceCategory.Select(x => x.CategoryId).ToArray();
 
             uint batchSize = 100_000;
-            uint batchCount = Count / batchSize;
+            uint batchCount = (uint) Math.Ceiling(1.0 * Count / batchSize);
             Console.Write(
                 $"Generating {Count:N0} relations for {productIds.Length:N0} products and {categoryIds.Length:N0} categories in batches of {batchSize:N0}. ");
             using (var p = new ProgressBar())
@@ -60,6 +60,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.CategoryId, f => f.PickRandom(categoryIds))
                 .Generate();
         }
-
     }
 }
