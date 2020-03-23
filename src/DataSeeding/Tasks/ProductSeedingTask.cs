@@ -194,10 +194,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 uint batchSize = 1_000_000;
                 uint estimatedBatchCount = 1 + Count * (uint) languageCodes.Length / batchSize;
                 var descriptionBatches = products.SelectMany(product =>
-                    languageCodes.Select(language =>
-                    {
-                        return GenerateDescription(product, language);
-                    })
+                    languageCodes.Select(language => { return GenerateDescription(product, language); })
                 ).Batch(batchSize);
 
                 descriptionBatches.EachWithIndex((descriptions, index) =>
@@ -261,19 +258,27 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         protected List<UCommerceProduct> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
             string[] languageCodes, string[] mediaIds)
         {
-            Console.Write($"Generating {Count:N0} products. ");
+            uint batchSize = 100_000;
+            uint numberOfBatches = (uint) Math.Ceiling(1.0 * Count / batchSize);
+            Console.Write($"Generating {Count:N0} {EntityNamePlural} in {numberOfBatches} batches of {batchSize}. ");
+            var insertedProducts = new List<UCommerceProduct>((int) Count);
             using (var p = new ProgressBar())
             {
-                var products =
+                var variantBatches =
                     GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
                             Count)
-                        .DistinctBy(x => x.UniqueIndex())
-                        .ToList();
+                        .DistinctBy(a => a.UniqueIndex())
+                        .Batch(batchSize);
 
-                p.Report(0.5);
+                variantBatches.EachWithIndex((variants, index) =>
+                {
+                    var listOfVariants = variants.ToList();
+                    context.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
+                    insertedProducts.AddRange(listOfVariants);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
 
-                context.BulkInsert(products, options => options.SetOutputIdentity = true);
-                return products;
+                return insertedProducts;
             }
         }
 

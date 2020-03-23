@@ -61,16 +61,27 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         protected IList<UCommerceProduct> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products,
             string[] mediaIds)
         {
-            Console.Write($"Generating {Count:N0} {EntityNamePlural}. ");
+            uint batchSize = 100_000;
+            uint numberOfBatches = (uint) Math.Ceiling(1.0 * Count / batchSize);
+            Console.Write($"Generating {Count:N0} {EntityNamePlural} in {numberOfBatches} batches of {batchSize}. ");
+            var insertedProducts = new List<UCommerceProduct>((int) Count);
             using (var p = new ProgressBar())
             {
-                var variants =
+                var variantBatches =
                     GeneratorHelper.Generate(() => GenerateVariant(mediaIds, products),
-                        Count).ToList();
+                            Count)
+                        .DistinctBy(a => a.UniqueIndex())
+                        .Batch(batchSize);
 
-                p.Report(0.5);
-                context.BulkInsert(variants, options => options.SetOutputIdentity = true);
-                return variants;
+                variantBatches.EachWithIndex((variants, index) =>
+                {
+                    var listOfVariants = variants.ToList();
+                    context.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
+                    insertedProducts.AddRange(listOfVariants);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
+
+                return insertedProducts;
             }
         }
 
