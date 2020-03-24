@@ -4,7 +4,7 @@
       {
         "culture": "",
         "seg": "",
-        "val": "{\r\n  \"crops\": null,\r\n  \"focalPoint\": {\r\n    \"left\": 0.5,\r\n    \"top\": 0.5\r\n  },\r\n  \"src\": \"<mediaPath>\"\r\n}"
+        "val": "{\"crops\":null,\"focalPoint\":{\"left\":0.5,\"top\":0.5},\"src\":\"<mediaPath>\"}"
       }
     ],
     "umbracoWidth": [
