@@ -42,7 +42,7 @@ namespace Ucommerce.Seeder
             PriceGroups = 5,
             TiersPerPriceGroup = 1,
 
-            Products = 200_000,
+            Products = 20000,
             AverageVariantsPerProduct = 4,
             ProductRelationsPerProduct = 3,
 
