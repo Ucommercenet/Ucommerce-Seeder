@@ -60,8 +60,12 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
             {
                 if (_disposed) return;
 
+                if (double.IsNaN(_currentProgress))
+                    return;
+
                 int progressBlockCount = (int) (_currentProgress * BlockCount);
                 int percent = (int) (_currentProgress * 100);
+                
                 string text = string.Format("[{0}{1}] {2,3}% {3}",
                     new string('#', progressBlockCount), new string('-', BlockCount - progressBlockCount),
                     percent,
