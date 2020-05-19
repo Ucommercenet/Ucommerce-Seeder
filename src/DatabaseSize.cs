@@ -42,15 +42,15 @@ namespace Ucommerce.Seeder
             PriceGroups = 5,
             TiersPerPriceGroup = 1,
 
-            Products = 20000,
+            Products = 5000,
             AverageVariantsPerProduct = 4,
             ProductRelationsPerProduct = 3,
 
             Stores = 1,
             CatalogsPerStore = 1,
-            CategoriesPerCatalog = 250,
+            CategoriesPerCatalog = 50,
 
-            AverageProductsPerCategory = 3000,
+            AverageProductsPerCategory = 300,
 
             CmsMediaFolders = 10,
             CmsImagesPerFolder = 100

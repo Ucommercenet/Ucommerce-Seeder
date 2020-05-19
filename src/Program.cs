@@ -25,6 +25,10 @@ namespace Ucommerce.Seeder
                 app.Option<bool>("-n|--no-cms", 
                     "Exclude CMS specific tables (Umbraco)", CommandOptionType.NoValue);
 
+            CommandOption<bool> fixRandomSeedArgument = 
+                app.Option<bool>("-f|--fixed-random-seed", 
+                    "Fix the underlying Random seed to produce the same sample values each time", CommandOptionType.NoValue);
+
             CommandOption<string> jsonFilePath = 
                 app.Option<string>("-i|--input-json-file", 
                     "Define database dimensions in a json file. See the example file 'example-db-size.json'.", CommandOptionType.SingleOrNoValue);
@@ -40,7 +44,7 @@ namespace Ucommerce.Seeder
                 }
                 
                 DbSizeOption dbSize = sizeArgument.HasValue() ? sizeArgument.ParsedValue : DbSizeOption.Huge;
-                return new Seeder(connectionString, dbSize, verboseArgument.HasValue(), noCmsArgument.HasValue(), jsonFilePath.Value()).Run();
+                return new Seeder(connectionString, dbSize, verboseArgument.HasValue(), noCmsArgument.HasValue(), jsonFilePath.Value(), fixRandomSeedArgument.HasValue()).Run();
             });
 
             return app.Execute(args);

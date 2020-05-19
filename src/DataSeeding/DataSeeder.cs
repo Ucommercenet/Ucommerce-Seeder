@@ -13,11 +13,13 @@ namespace Ucommerce.Seeder.DataSeeding
     {
         private readonly DatabaseSize _sizeOptions;
         private readonly bool _excludeCmsTables;
+        private readonly bool _fixedRandomSeed;
 
-        public DataSeeder(DatabaseSize sizeOptions, bool excludeCmsTables)
+        public DataSeeder( DatabaseSize sizeOptions, bool excludeCmsTables, bool fixedRandomSeed)
         {
             _sizeOptions = sizeOptions;
             _excludeCmsTables = excludeCmsTables;
+            _fixedRandomSeed = fixedRandomSeed;
         }
 
         //
@@ -74,6 +76,10 @@ namespace Ucommerce.Seeder.DataSeeding
 
                 foreach (var task in seedingTasks)
                 {
+                    if (_fixedRandomSeed)
+                    {
+                        Bogus.Randomizer.Seed = new Random(42);
+                    }
                     task.Seed(context);
                 }
             }

@@ -14,13 +14,16 @@ namespace Ucommerce.Seeder
         private readonly string _connectionString;
         private readonly bool _verbose;
         private readonly bool _excludeCmsTables;
+        private readonly bool _fixedRandomSeed;
         private readonly DatabaseSize _dbSize;
 
-        public Seeder(string connectionString, DbSizeOption dbSize, bool verbose, bool excludeCmsTables, string useJsonDbSizePath)
+        public Seeder(    string connectionString, DbSizeOption dbSize, bool verbose, bool excludeCmsTables,
+            string useJsonDbSizePath, bool fixedRandomSeed)
         {
             _connectionString = connectionString;
             _verbose = verbose;
             _excludeCmsTables = excludeCmsTables;
+            _fixedRandomSeed = fixedRandomSeed;
 
             if (useJsonDbSizePath != null)
             {
@@ -59,7 +62,7 @@ namespace Ucommerce.Seeder
 
         public int Run()
         {
-            var seeder = new DataSeeder(_dbSize, _excludeCmsTables);
+            var seeder = new DataSeeder(_dbSize, _excludeCmsTables, _fixedRandomSeed);
 
             seeder.Seed(() =>
             {
