@@ -95,7 +95,7 @@ For example: `./seed large` will generate a "large" database.
 
 ## Limitations
 
-1. For now, this tool only works with Umbraco 8 and Ucommerce 8. It has a hard dependency on the table structure of both. 
+1. For now, this tool only works with Umbraco 8 and Ucommerce 9. It has a hard dependency on the table structure of both. 
 Future versions will work with other CMSs.
 
 1. Although the tool uses SQL Bulk Copy, seeding large databases takes a long time.
@@ -107,7 +107,7 @@ Future versions will work with other CMSs.
 ## Prerequisites
 
 * [.NET Core 3.0](https://dotnet.microsoft.com/download/dotnet-core/3.0)
-* A SQL Server database with Umbraco 8 and Ucommerce 8 installed.
+* A SQL Server database with Umbraco 8 and Ucommerce 9 installed.
 
 
 ## Preparation
