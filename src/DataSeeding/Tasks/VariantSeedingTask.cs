@@ -35,13 +35,17 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var productDefinitionFields = LookupProductDefinitionFields(context, true);
             var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
-            
+
             var productFamilyIds = context.UCommerceProduct
-                .Where(p => p.ProductDefinition.UCommerceProductDefinitionField.Any(f => f.IsVariantProperty)) // pick families only
+                .Where(p => p.ProductDefinition.UCommerceProductDefinitionField.Any(f =>
+                    f.IsVariantProperty)) // pick families only
                 .Where(p => p.ParentProductId == null) // don't pick variants
-                .Select(product => new ProductWithDefinition {ProductId = product.ProductId, ProductDefinitionId = product.ProductDefinitionId, Sku = product.Sku})
+                .Select(product => new ProductWithDefinition
+                {
+                    ProductId = product.ProductId, ProductDefinitionId = product.ProductDefinitionId, Sku = product.Sku
+                })
                 .ToArray();
-            
+
             var mediaIds = _cmsContent.GetAllMediaIds(context);
             var contentIds = _cmsContent.GetAllMediaIds(context);
 
@@ -54,18 +58,30 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GeneratePrices(context, priceGroupIds, products);
         }
 
-        protected IList<UCommerceProduct> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products, string[] mediaIds)
+        protected IList<UCommerceProduct> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products,
+            string[] mediaIds)
         {
-            Console.Write($"Generating {Count:N0} {EntityNamePlural}. ");
+            uint batchSize = 100_000;
+            uint numberOfBatches = (uint) Math.Ceiling(1.0 * Count / batchSize);
+            Console.Write($"Generating {Count:N0} {EntityNamePlural} in {numberOfBatches} batches of {batchSize}. ");
+            var insertedProducts = new List<UCommerceProduct>((int) Count);
             using (var p = new ProgressBar())
             {
-                var variants =
+                var variantBatches =
                     GeneratorHelper.Generate(() => GenerateVariant(mediaIds, products),
-                        Count).ToList();
+                            Count)
+                        .DistinctBy(a => a.UniqueIndex())
+                        .Batch(batchSize);
 
-                p.Report(0.5);
-                context.BulkInsert(variants, options => options.SetOutputIdentity = true);
-                return variants;
+                variantBatches.EachWithIndex((variants, index) =>
+                {
+                    var listOfVariants = variants.ToList();
+                    context.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
+                    insertedProducts.AddRange(listOfVariants);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
+
+                return insertedProducts;
             }
         }
 
@@ -82,7 +98,21 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .Generate();
 
             return product;
+        }
 
+        protected override UCommerceProductDescription GenerateDescription(UCommerceProduct product,
+            string languageCode)
+        {
+            string parentDisplayName = product.ParentProduct
+                ?.UCommerceProductDescription
+                ?.FirstOrDefault(d => d.CultureCode == languageCode)
+                ?.DisplayName ?? "";
+
+            return _productDescriptionFaker
+                .RuleFor(x => x.CultureCode, f => languageCode)
+                .RuleFor(x => x.DisplayName, f => $"{parentDisplayName} {f.Commerce.Color()}")
+                .RuleFor(x => x.ProductId, f => product.ProductId)
+                .Generate();
         }
     }
 }

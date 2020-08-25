@@ -82,7 +82,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
         {
             return _datatypeFaker
                 .RuleFor(x => x.DefinitionId, f => f.PickRandom(definitionIds))
-                .RuleFor(x => x.DefinitionName, "?")
+                .RuleFor(x => x.DefinitionName, f => f.PickRandom<BuiltInEditors>().ToString())
                 .Generate();
         }
     }

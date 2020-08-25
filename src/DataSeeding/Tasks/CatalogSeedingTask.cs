@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
@@ -62,16 +63,20 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             using (var p = new ProgressBar())
             {
                 uint batchSize = 100_000;
-                uint numberOfBatches = 1 + (uint) catalogs.Count() * (uint) priceGroupIds.Length / batchSize;
+                uint numberOfBatches =
+                    (uint) Math.Ceiling(1.0 * catalogs.Count() * (uint) priceGroupIds.Length / batchSize);
                 var allowedPriceGroupBatches = catalogs.SelectMany(catalog =>
                     priceGroupIds.Select(priceGroupId =>
-                        _faker.Random.Bool()
-                            ? new UCommerceProductCatalogPriceGroupRelation
-                                {PriceGroupId = priceGroupId, ProductCatalogId = catalog.ProductCatalogId, Guid = _faker.Random.Guid()}
-                            : null
-                    )
+                            _faker.Random.Bool()
+                                ? new UCommerceProductCatalogPriceGroupRelation
+                                {
+                                    PriceGroupId = priceGroupId, ProductCatalogId = catalog.ProductCatalogId,
+                                    Guid = _faker.Random.Guid()
+                                }
+                                : null
+                        )
                         .Compact()).Batch(batchSize);
-                
+
                 allowedPriceGroupBatches.EachWithIndex((allowedPriceGroups, index) =>
                 {
                     context.BulkInsert(allowedPriceGroups.ToList(), options => options.SetOutputIdentity = false);
@@ -91,8 +96,11 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 var contentIds = _cmsContent.GetAllContentIds(context);
                 var definitionFields = LookupDefinitionFields(context, definitionIds);
                 uint batchSize = 100_000;
-                uint numberOfBatches = definitionFields.Any() ? (uint) (1 + batchSize / definitionFields.Average(x => x.Count()) / catalogs.Count()) : 1;
-                
+                uint numberOfBatches = definitionFields.Any()
+                    ? (uint) Math.Ceiling (
+                        1.0 * batchSize / definitionFields.Average(x => x.Count()) / catalogs.Count())
+                    : 1;
+
                 var propertiyBatches = catalogs
                     .Where(catalog => catalog.DefinitionId.HasValue)
                     // ReSharper disable once PossibleInvalidOperationException
@@ -112,11 +120,12 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceProductCatalog> catalogs,
             string[] languageCodes)
         {
-            Console.Write($"Generating {(catalogs.Count() * languageCodes.Length):N0} descriptions for {Count:N0} catalogs. ");
+            Console.Write(
+                $"Generating {(catalogs.Count() * languageCodes.Length):N0} descriptions for {Count:N0} catalogs. ");
             using (var p = new ProgressBar())
             {
                 uint batchSize = 100_000;
-                uint numberOfBatches = (uint) (catalogs.Count() * languageCodes.Length) / batchSize;
+                uint numberOfBatches = (uint) Math.Ceiling(1.0 * catalogs.Count() * languageCodes.Length / batchSize);
                 var descriptionBatches = catalogs.SelectMany(catalog =>
                     languageCodes.Select(language => _descriptionFaker
                         .RuleFor(x => x.CultureCode, f => language)
@@ -159,6 +168,5 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.PriceGroupId, f => f.PickRandom(priceGroupIds))
                 .Generate();
         }
-
     }
 }

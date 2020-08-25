@@ -175,7 +175,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                             options.SetOutputIdentity = false;
                             // Specifying the columns to insert is necessary for this table only.
                             // The reason is unknown, but if you omit it, MinimumQuantity will always be '1'.
-                            options.PropertiesToInclude = new [] { "MinimumQuantity", "Guid", "ProductId", "PriceId"}.ToList();
+                            options.PropertiesToInclude =
+                                new [] { "MinimumQuantity", "Guid", "ProductId", "PriceId"}.ToList();
                         });
 
                     p.Report(1.0 * ++batchCount / numBatches);
@@ -191,9 +192,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             using (var p = new ProgressBar())
             {
                 uint batchSize = 1_000_000;
-                uint estimatedBatchCount = 1 + Count * (uint) languageCodes.Length / batchSize;
+                uint estimatedBatchCount = (uint) Math.Ceiling(1.0 *  Count * (uint) languageCodes.Length / batchSize);
                 var descriptionBatches = products.SelectMany(product =>
-                    languageCodes.Select(language => GenerateDescription(product.ProductId, language))
+                    languageCodes.Select(language => { return GenerateDescription(product, language); })
                 ).Batch(batchSize);
 
                 descriptionBatches.EachWithIndex((descriptions, index) =>
@@ -213,7 +214,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 ? (uint) productDefinitionFields.Average(f => f.Count()) / 2
                 : 1;
             uint batchSize = 1_000_000;
-            uint estimatedBatchCount = 1 + Count * averageNumberOfFieldsPerProduct / batchSize;
+            uint estimatedBatchCount = (uint) Math.Ceiling(1.0 * Count * averageNumberOfFieldsPerProduct / batchSize);
 
             Console.Write(
                 $"Generating ~{averageNumberOfFieldsPerProduct * products.Count():N0} language variant properties with values for {products.Count():N0} {EntityNamePlural}. ");
@@ -257,19 +258,27 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         protected List<UCommerceProduct> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
             string[] languageCodes, string[] mediaIds)
         {
-            Console.Write($"Generating {Count:N0} products. ");
+            uint batchSize = 100_000;
+            uint numberOfBatches = (uint) Math.Ceiling(1.0 * Count / batchSize);
+            Console.Write($"Generating {Count:N0} {EntityNamePlural} in {numberOfBatches} batches of {batchSize}. ");
+            var insertedProducts = new List<UCommerceProduct>((int) Count);
             using (var p = new ProgressBar())
             {
-                var products =
+                var variantBatches =
                     GeneratorHelper.Generate(() => GenerateProduct(productDefinitionIds, languageCodes, mediaIds),
-                        Count)
-                        .DistinctBy(x => x.UniqueIndex())
-                        .ToList();
-                
-                p.Report(0.5);
-                
-                context.BulkInsert(products, options => options.SetOutputIdentity = true);
-                return products;
+                            Count)
+                        .DistinctBy(a => a.UniqueIndex())
+                        .Batch(batchSize);
+
+                variantBatches.EachWithIndex((variants, index) =>
+                {
+                    var listOfVariants = variants.ToList();
+                    context.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
+                    insertedProducts.AddRange(listOfVariants);
+                    p.Report(1.0 * index / numberOfBatches);
+                });
+
+                return insertedProducts;
             }
         }
 
@@ -342,7 +351,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         .Generate()).ToArray();
         }
 
-        protected UCommerceProduct GenerateProduct(int[] productDefinitionIds, string[] languageCodes, string[] mediaIds)
+        protected UCommerceProduct GenerateProduct(int[] productDefinitionIds, string[] languageCodes,
+            string[] mediaIds)
         {
             var product = _productFaker
                 .RuleFor(x => x.ProductDefinitionId, f => f.PickRandom(productDefinitionIds))
@@ -353,11 +363,12 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             return product;
         }
 
-        protected UCommerceProductDescription GenerateDescription(int productId, string languageCode)
+        protected virtual UCommerceProductDescription GenerateDescription(UCommerceProduct product, string languageCode)
         {
             return _productDescriptionFaker
                 .RuleFor(x => x.CultureCode, f => languageCode)
-                .RuleFor(x => x.ProductId, f => productId)
+                .RuleFor(x => x.DisplayName, f => $"{product.Name} {f.Vehicle.Fuel()}")
+                .RuleFor(x => x.ProductId, f => product.ProductId)
                 .Generate();
         }
     }

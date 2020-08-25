@@ -28,7 +28,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             _categoryFaker = new Faker<UCommerceCategory>()
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f))
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
-                .RuleFor(x => x.Name, f => $"{f.Commerce.ProductAdjective()} {f.Commerce.ProductMaterial()} {f.Commerce.Product()}")
+                .RuleFor(x => x.Name, f => $"{f.Commerce.ProductAdjective()} {f.Commerce.ProductMaterial()}")
                 .RuleFor(x => x.CreatedBy, f => f.Name.FullName())
                 .RuleFor(x => x.CreatedOn, f => f.Date.Past())
                 .RuleFor(x => x.ModifiedBy, f => f.Name.FullName())
@@ -41,7 +41,6 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             _descriptionFaker = new Faker<UCommerceCategoryDescription>()
                 .RuleFor(x => x.Description, f => f.Lorem.Text())
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
-                .RuleFor(x => x.DisplayName, f => f.Commerce.Product())
                 .RuleFor(x => x.RenderAsContent, f => f.Random.Bool(0.75f));
         }
 
@@ -72,11 +71,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             string[] languageCodes, string[] mediaIds)
         {
             var definitionFields = LookupDefinitionFields(context, definitionIds);
-            uint estimatedPropertyCount = definitionFields.Any() ? (uint) definitionFields.Average(x => x.Count()) * (uint) categories.Count() : 1;
+            uint estimatedPropertyCount = definitionFields.Any()
+                ? (uint) definitionFields.Average(x => x.Count()) * (uint) categories.Count()
+                : 1;
             uint batchSize = 1_000_000;
-            uint numberOfBatches = 1 + estimatedPropertyCount / batchSize;
+            uint numberOfBatches = (uint) Math.Ceiling(1.0 * estimatedPropertyCount / batchSize);
 
-            Console.Write($"Generating ~{estimatedPropertyCount:N0} properties for {categories.Count():N0} categories. ");
+            Console.Write(
+                $"Generating ~{estimatedPropertyCount:N0} properties for {categories.Count():N0} categories. ");
             using (var p = new ProgressBar())
             {
                 var contentIds = _cmsContent.GetAllContentIds(context);
@@ -99,14 +101,17 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             string[] languageCodes)
         {
             uint batchSize = 100_000;
-            uint numberOfBatches = (uint) categories.Count() * (uint) languageCodes.Length / batchSize; 
-            Console.Write($"Generating {categories.Count() * languageCodes.Length:N0} descriptions for {categories.Count():N0} categories in batches of {batchSize:N0}. ");
+            uint numberOfBatches =
+                (uint) Math.Ceiling(1.0 * categories.Count() * (uint) languageCodes.Length / batchSize);
+            Console.Write(
+                $"Generating {categories.Count() * languageCodes.Length:N0} descriptions for {categories.Count():N0} categories in batches of {batchSize:N0}. ");
             using (var p = new ProgressBar())
             {
                 var descriptionBatches = categories.SelectMany(category =>
                     languageCodes.Select(language => _descriptionFaker
                         .RuleFor(x => x.CultureCode, f => language)
                         .RuleFor(x => x.CategoryId, f => category.CategoryId)
+                        .RuleFor(x => x.DisplayName, f => $"{category.Name} {f.Commerce.Product()}")
                         .Generate()
                     )).Batch(batchSize);
 
@@ -122,16 +127,16 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             int[] catalogIds, string[] mediaIds)
         {
             uint batchSize = 100_000;
-            uint numberOfBatches = Count / 5 / batchSize;
+            uint numberOfBatches = (uint) Math.Ceiling(1.0 * Count / 5 / batchSize);
             Console.Write($"Generating {Count / 5:N0} top level categories in batches of {batchSize:N0}. ");
-            var insertedCategories = new List<UCommerceCategory>((int)Count / 5);
+            var insertedCategories = new List<UCommerceCategory>((int) Count / 5);
             using (var p = new ProgressBar())
             {
                 var categoryBatches = GeneratorHelper
                     .Generate(() => GenerateCategory(definitionIds, catalogIds, mediaIds), Count / 5)
                     .DistinctBy(a => a.UniqueIndex())
                     .Batch(batchSize);
-                
+
                 categoryBatches.EachWithIndex((categories, index) =>
                 {
                     var listOfCats = categories.ToList();
@@ -139,7 +144,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     insertedCategories.AddRange(listOfCats);
                     p.Report(1.0 * index / numberOfBatches);
                 });
-                
+
                 return insertedCategories;
             }
         }
@@ -148,16 +153,16 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             int[] definitionIds, string[] mediaIds, IEnumerable<UCommerceCategory> topLevelCategories)
         {
             uint batchSize = 100_000;
-            uint numberOfBatches = 4 * Count / 5 / batchSize;
+            uint numberOfBatches = (uint) Math.Ceiling( 4.0 * Count / 5.0 / batchSize);
             Console.Write($"Generating {4 * Count / 5:N0} subcategories in batches of {batchSize}. ");
-            var insertedCategories = new List<UCommerceCategory>((int)Count / 5);
+            var insertedCategories = new List<UCommerceCategory>((int) Count / 5);
             using (var p = new ProgressBar())
             {
                 var categoryBatches = GeneratorHelper
                     .Generate(() => GenerateSubCategory(definitionIds, mediaIds, topLevelCategories), 4 * Count / 5)
                     .DistinctBy(a => a.UniqueIndex())
                     .Batch(batchSize);
-                
+
                 categoryBatches.EachWithIndex((categories, index) =>
                 {
                     var listOfCats = categories.ToList();
@@ -165,13 +170,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                     insertedCategories.AddRange(listOfCats);
                     p.Report(1.0 * index / numberOfBatches);
                 });
-                
+
                 return insertedCategories;
             }
         }
 
         private List<UCommerceCategoryProperty> AddCategoryProperty(int categoryId,
-            UCommerceDefinitionField field, string[] languageCodes, string[] mediaIds, string[] contentIds, string editor,
+            UCommerceDefinitionField field, string[] languageCodes, string[] mediaIds, string[] contentIds,
+            string editor,
             Guid[] enumGuids)
         {
             if (field.Multilingual)
@@ -209,15 +215,16 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .Generate();
         }
 
-        private UCommerceCategory GenerateSubCategory(int[] definitionIds, string[] mediaIds, IEnumerable<UCommerceCategory> parentCategories)
+        private UCommerceCategory GenerateSubCategory(int[] definitionIds, string[] mediaIds,
+            IEnumerable<UCommerceCategory> parentCategories)
         {
             var parentCategory = _faker.PickRandom(parentCategories);
 
             if (parentCategory.CategoryId == 0)
             {
-                throw new InvalidOperationException("Parent category must have an Id.");    
+                throw new InvalidOperationException("Parent category must have an Id.");
             }
-            
+
             return _categoryFaker
                 .RuleFor(x => x.DefinitionId, f => f.PickRandom(definitionIds))
                 .RuleFor(x => x.ProductCatalogId, f => parentCategory.ProductCatalogId)

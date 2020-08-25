@@ -86,7 +86,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                 var folderContentNus =
                     folderContents.Select(folder => new CmsContentNu
                     {
-                        NodeId = folder.NodeId, Published = true,
+                        NodeId = folder.NodeId, Published = false,
                         Data = "{\"properties\":{},\"cultureData\":{},\"urlSegment\":\"" + _faker.Lorem.Slug() + "\"}"
                     }).ToArray();
                 context.BulkInsert(folderContentNus);
@@ -194,7 +194,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
         private CmsContentNu GenerateImageNu(UmbracoContent image, string imagePath, string template)
         {
             string json = template.Replace("<mediaPath>", imagePath);
-            return new CmsContentNu {NodeId = image.NodeId, Published = true, Data = json};
+            return new CmsContentNu {NodeId = image.NodeId, Published = false, Data = json};
         }
 
         private UmbracoNode GenerateImage(UmbracoNode folder)
