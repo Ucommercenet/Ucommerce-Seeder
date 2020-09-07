@@ -25,7 +25,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.Guid, f => f.Random.Guid())
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f))
                 .RuleFor(x => x.Multilingual, f => f.Random.Bool())
-                .RuleFor(x => x.Name, f => $"{f.Commerce.Color()} {f.Commerce.Product()}")
+                .RuleFor(x => x.Name, f => $"{f.Commerce.Color()}{f.Commerce.Product()}")
                 .RuleFor(x => x.Searchable, f => f.Random.Bool())
                 .RuleFor(x => x.BuiltIn, f => false)
                 .RuleFor(x => x.DefaultValue, f => null)
