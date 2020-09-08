@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Bogus;
 
 namespace Ucommerce.Seeder.DataSeeding.Utilities
@@ -41,12 +42,12 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
                 {
                     BuiltInEditors.Enum,
                     (mediaGuids, contentGuids, enumGuids) => _faker
-                        .PickRandom(enumGuids).ToString()
+                        .PickRandomOrDefault(enumGuids).ToString()
                 },
                 {
                     BuiltInEditors.EnumMultiSelect,
                     (mediaGuids, contentGuids, enumGuids) => String.Join("|", _faker
-                        .PickRandom(enumGuids, _faker.Random.Int(0, 5)))
+                        .PickRandom(enumGuids, _faker.Random.Int(0, Math.Min(5, enumGuids.Count()))))
                 },
             };
 

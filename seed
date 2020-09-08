@@ -3,25 +3,30 @@ set -e
 DB_SIZE=${1:-medium}
 echo "Target DB size: $DB_SIZE"
 
-docker-compose up --no-start
-docker-compose start mssql
+docker-compose up -d
+echo "annoying brittle mssql startup forces us to wait"
+sleep 10
 
 echo "Detaching existing db"
-docker-compose exec mssql /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; IF DB_ID('umbraco810') IS NOT NULL EXEC sp_detach_db @dbname = N'umbraco810';"
+docker-compose exec -T mssql /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; IF DB_ID('umbraco864') IS NOT NULL EXEC sp_detach_db @dbname = N'umbraco864';"
 
 echo "Copying clean db"
-docker-compose exec mssql cp -f /etc/seeder/db/umbraco810_blank.mdf /var/opt/mssql/data/umbraco810_seeding.mdf
-docker-compose exec mssql cp -f /etc/seeder/db/umbraco810_blank.ldf /var/opt/mssql/data/umbraco810_seeding.ldf
+docker-compose exec -T mssql cp -f /var/opt/seeding/umbraco864_blank.mdf /var/opt/mssql/data/umbraco864_seeding.mdf
+docker-compose exec -T mssql cp -f /var/opt/seeding/umbraco864_blank.ldf /var/opt/mssql/data/umbraco864_seeding.ldf
 
 echo "Attaching clean db"
-docker-compose exec mssql /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; CREATE DATABASE umbraco810 ON (FILENAME = '/var/opt/mssql/data/umbraco810_seeding.mdf'), (FILENAME = '/var/opt/mssql/data/umbraco810_seeding.ldf') FOR ATTACH;"
+docker-compose exec -T mssql /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; CREATE DATABASE umbraco864 ON (FILENAME = '/var/opt/mssql/data/umbraco864_seeding.mdf'), (FILENAME = '/var/opt/mssql/data/umbraco864_seeding.ldf') FOR ATTACH;"
 
 echo "Seeding db"
-docker-compose run dotnetcore bash -c "dotnet run -p Ucommerce.Seeder.csproj -- -s:$DB_SIZE -c:\"server=mssql;database=umbraco810;user id=sa;password=Pass@Word1\""
-docker-compose exec mssql /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; IF DB_ID('umbraco810') IS NOT NULL EXEC sp_detach_db @dbname = N'umbraco810';"
+docker-compose run -T dotnetcore bash -c "dotnet run -p Ucommerce.Seeder.csproj -- -s:$DB_SIZE -c:\"server=mssql;database=umbraco864;user id=sa;password=Pass@Word1\""
+docker-compose exec -T mssql /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Pass@Word1 -Q "USE master; IF DB_ID('umbraco864') IS NOT NULL EXEC sp_detach_db @dbname = N'umbraco864';"
 
 echo "Moving seeded db"
-docker-compose exec mssql mv -f /var/opt/mssql/data/umbraco810_seeding.mdf /etc/seeder/db/umbraco810_done.mdf
-docker-compose exec mssql mv -f /var/opt/mssql/data/umbraco810_seeding.ldf /etc/seeder/db/umbraco810_done.ldf
+# docker-compose exec -T mssql mv -f /var/opt/mssql/data/umbraco864_seeding.mdf /var/opt/seeding/umbraco864_done.mdf
+# docker-compose exec -T mssql mv -f /var/opt/mssql/data/umbraco864_seeding.ldf /var/opt/seeding/umbraco864_done.ldf
 
-echo "Your finished db: db/umbraco810_done.mdf"
+docker cp "$(docker-compose ps -q mssql)":/var/opt/mssql/data/umbraco864_seeding.mdf ./db/umbraco864_done.mdf
+docker cp "$(docker-compose ps -q mssql)":/var/opt/mssql/data/umbraco864_seeding.ldf ./db/umbraco864_done.ldf
+
+docker-compose down
+echo "Your finished db: db/umbraco864_done.mdf"
