@@ -3,18 +3,11 @@ name: .NET Core
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  pull_request: ~
 
-defaults:
-  run:
-    working-directory: src
-    
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -23,7 +16,54 @@ jobs:
         dotnet-version: 3.1.301
     - name: Install dependencies
       run: dotnet restore
+      working-directory: ./src
     - name: Build
       run: dotnet build --configuration Release --no-restore
+      working-directory: ./src
     - name: Test
       run: dotnet test --no-restore --verbosity normal
+      working-directory: ./src
+
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Seed smoke test
+      run: ./seed tinyfortesting
+    - name: Upload tiny db
+      uses: actions/upload-artifact@v2
+      with:
+        name: tinyfortesting
+        path: |
+          db/umbraco864_done.mdf
+          db/umbraco864_done.ldf
+
+  devsize:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Seed dev size
+      run: ./seed dev
+    - name: Upload dev size db
+      uses: actions/upload-artifact@v2
+      with:
+        name: dev
+        path: |
+          db/umbraco864_done.mdf
+          db/umbraco864_done.ldf
+
+  medium:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Seed medium size
+      run: ./seed medium
+    - name: Upload medium size db
+      uses: actions/upload-artifact@v2
+      with:
+        name: medium
+        path: |
+          db/umbraco864_done.mdf
+          db/umbraco864_done.ldf
+ 
+ 

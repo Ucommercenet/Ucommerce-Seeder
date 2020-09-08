@@ -1,16 +1,21 @@
 version: '3.2'
 services:
   mssql:
-    image: mcr.microsoft.com/mssql/server
+    image: mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
     environment:
       ACCEPT_EULA: Y
       MSSQL_PID: Developer
       SA_PASSWORD: Pass@Word1
+      MSSQL_IP_ADDRESS: 0.0.0.0
     ports:
       - "1433:1433"
     volumes:
-      - ./db:/etc/seeder/db
-
+      - ./db:/var/opt/seeding
+    healthcheck:
+      test: [ "CMD", "sqlcmd", "-U", "sa", "-P", "Pass@Word1", "-Q", "select 1" ]
+      interval: 2s
+      retries: 20  
+      
   dotnetcore:
     image: mcr.microsoft.com/dotnet/core/sdk:3.0
     links:
