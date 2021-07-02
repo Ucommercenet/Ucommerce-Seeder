@@ -65,7 +65,7 @@ namespace Ucommerce.Seeder.DataSeeding
             }
         }
         
-        protected ILookup<int, DefinitionFieldEditorAndEnum> LookupDefinitionFields(UcommerceDbContext context, int[] definitionIds)
+        protected ILookup<int, DefinitionFieldEditorAndEnum> LookupDefinitionFields(DataContext context, int[] definitionIds)
         {
             var uCommerceDefinitionFields = context.Ucommerce.UCommerceDefinitionField
                 .Where(field => definitionIds.Contains(field.DefinitionId));

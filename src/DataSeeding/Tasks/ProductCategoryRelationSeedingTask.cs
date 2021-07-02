@@ -48,7 +48,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 relationBatches.EachWithIndex((relations, index) =>
                 {
-                    context.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / batchCount);
                 });
             }

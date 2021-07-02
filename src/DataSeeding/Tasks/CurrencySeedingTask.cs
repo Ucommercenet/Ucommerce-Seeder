@@ -36,7 +36,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         .DistinctBy(x => x.Isocode);
 
                 p.Report(0.5);
-                context.BulkInsert(currencies.ToList(), options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(currencies.ToList(), options => options.SetOutputIdentity = false);
             }
         }
 

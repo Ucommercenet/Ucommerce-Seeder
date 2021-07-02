@@ -63,7 +63,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .ToArray();
 
                 p.Report(0.5);
-                context.BulkInsert(properties, options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(properties, options => options.SetOutputIdentity = false);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
             {
                 var dataTypes = GeneratorHelper.Generate(() => Generate(definitionIds), Count).ToList();
                 p.Report(0.5);
-                context.BulkInsert(dataTypes);
+                context.Ucommerce.BulkInsert(dataTypes);
                 return dataTypes;
             }
         }

@@ -32,7 +32,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
             {
                 var dataTypes = GeneratorHelper.Generate(Generate, Count);
                 p.Report(0.5);
-                context.BulkInsert(dataTypes, options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(dataTypes, options => options.SetOutputIdentity = false);
             }
         }
 

@@ -42,7 +42,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 
                 p.Report(0.5);
 
-                context.BulkInsert(priceGroups, options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(priceGroups, options => options.SetOutputIdentity = false);
             }
         }
 

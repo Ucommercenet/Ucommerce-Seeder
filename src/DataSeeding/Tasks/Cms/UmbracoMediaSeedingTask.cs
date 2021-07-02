@@ -63,14 +63,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
 
                 folderNodes.ConsecutiveSortOrder((f, v) => f.SortOrder = (int) v);
 
-                context.BulkInsert(folderNodes, options => options.SetOutputIdentity = true);
+                context.Cms.BulkInsert(folderNodes, options => options.SetOutputIdentity = true);
 
                 foreach (var folderNode in folderNodes)
                 {
                     folderNode.Path = $"{folderNode.Path},{folderNode.Id}";
                 }
 
-                context.BulkUpdate(folderNodes);
+                context.Cms.BulkUpdate(folderNodes);
                 p.Report(0.1);
 
 
@@ -78,7 +78,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
 
                 var folderContents = folderNodes.Select(folder => new UmbracoContent
                     {NodeId = folder.Id, ContentTypeId = mediaFolderType}).ToArray();
-                context.BulkInsert(folderContents, options => options.SetOutputIdentity = true);
+                context.Cms.BulkInsert(folderContents, options => options.SetOutputIdentity = true);
                 p.Report(0.2);
 
 
@@ -90,7 +90,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                         NodeId = folder.NodeId, Published = false,
                         Data = "{\"properties\":{},\"cultureData\":{},\"urlSegment\":\"" + _faker.Lorem.Slug() + "\"}"
                     }).ToArray();
-                context.BulkInsert(folderContentNus);
+                context.Cms.BulkInsert(folderContentNus);
                 p.Report(0.3);
 
                 // Images
@@ -102,21 +102,21 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                 ).ToList();
 
                 imageNodes.ConsecutiveSortOrder((f, v) => f.SortOrder = (int) v);
-                context.BulkInsert(imageNodes, options => options.SetOutputIdentity = true);
+                context.Cms.BulkInsert(imageNodes, options => options.SetOutputIdentity = true);
 
                 foreach (var imageNode in imageNodes)
                 {
                     imageNode.Path = $"{imageNode.Path},{imageNode.Id}";
                 }
 
-                context.BulkUpdate(imageNodes);
+                context.Cms.BulkUpdate(imageNodes);
                 p.Report(0.4);
 
                 // Image Content
 
                 var imageContents = imageNodes
                     .Select(image => new UmbracoContent {NodeId = image.Id, ContentTypeId = mediaType}).ToList();
-                context.BulkInsert(imageContents, options => options.SetOutputIdentity = true);
+                context.Cms.BulkInsert(imageContents, options => options.SetOutputIdentity = true);
                 p.Report(0.5);
 
 
@@ -135,7 +135,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                 var imageContentNus =
                     imageContents.Select(imageContent =>
                         GenerateImageNu(imageContent, imagePaths[imageContent.NodeId], contentNuTemplate)).ToList();
-                context.BulkInsert(imageContentNus, options => options.SetOutputIdentity = true);
+                context.Cms.BulkInsert(imageContentNus, options => options.SetOutputIdentity = true);
                 p.Report(0.7);
 
 
@@ -145,11 +145,11 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                     .Select(media => new UmbracoContentVersion
                         {Current = true, NodeId = media.Id, Text = media.Text, UserId = -1, VersionDate = DateTime.Now})
                     .ToList();
-                context.BulkInsert(folderContentVersions, options => options.SetOutputIdentity = true);
+                context.Cms.BulkInsert(folderContentVersions, options => options.SetOutputIdentity = true);
 
                 var folderMediaVersions = folderContentVersions
                     .Select(contentVersion => new UmbracoMediaVersion {Id = contentVersion.Id, Path = ""}).ToList();
-                context.BulkInsert(folderMediaVersions, options => options.SetOutputIdentity = true);
+                context.Cms.BulkInsert(folderMediaVersions, options => options.SetOutputIdentity = true);
                 p.Report(0.8);
 
 
@@ -158,7 +158,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                 var imageContentVersions = imageNodes
                     .Select(media => new UmbracoContentVersion
                         {Current = true, NodeId = media.Id, Text = media.Text, UserId = -1, VersionDate = DateTime.Now}).ToList();
-                context.BulkInsert(imageContentVersions, options => options.SetOutputIdentity = true);
+                context.Cms.BulkInsert(imageContentVersions, options => options.SetOutputIdentity = true);
 
                 var propertyData = imageContentVersions.SelectMany(contentVersion =>
                 {
@@ -177,13 +177,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                         },
                     };
                 });
-                context.BulkInsert(propertyData.ToList(), options => options.SetOutputIdentity = false);
+                context.Cms.BulkInsert(propertyData.ToList(), options => options.SetOutputIdentity = false);
                 p.Report(0.9);
 
                 var imageMediaVersions = imageContentVersions
                     .Select(contentVersion => new UmbracoMediaVersion
                         {Id = contentVersion.Id, Path = imagePaths[contentVersion.NodeId]}).ToList();
-                context.BulkInsert(imageMediaVersions);
+                context.Cms.BulkInsert(imageMediaVersions);
             }
         }
 

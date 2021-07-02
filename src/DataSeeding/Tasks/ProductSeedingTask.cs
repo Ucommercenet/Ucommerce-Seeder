@@ -122,7 +122,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 relationBatches.EachWithIndex((relations, index) =>
                 {
-                    context.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
@@ -160,7 +160,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 foreach (var batch in priceBatches.Zip(productBatches, (prices, moreInfo) => new {prices, moreInfo}))
                 {
                     var prices = batch.prices.ToList();
-                    context.BulkInsert(prices,
+                    context.Ucommerce.BulkInsert(prices,
                         options => options.SetOutputIdentity = true );
 
                     p.Report(1.0 * ++batchCount / numBatches);
@@ -170,7 +170,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         GenerateProductPrice(zippedBatch.price.PriceId, zippedBatch.product.Product.ProductId,
                             zippedBatch.product.Tier)).ToArray();
 
-                    context.BulkInsert(productPrices,
+                    context.Ucommerce.BulkInsert(productPrices,
                         options =>
                         {
                             options.SetOutputIdentity = false;
@@ -200,7 +200,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 descriptionBatches.EachWithIndex((descriptions, index) =>
                     {
-                        context.BulkInsert(descriptions.ToList(), p => p.SetOutputIdentity = false);
+                        context.Ucommerce.BulkInsert(descriptions.ToList(), p => p.SetOutputIdentity = false);
                         p.Report(1.0 * index / estimatedBatchCount);
                     }
                 );
@@ -233,7 +233,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 languageVariantPropertyBatches.EachWithIndex((languageVariantProperties, index) =>
                 {
-                    context.BulkInsert(languageVariantProperties.ToList(),
+                    context.Ucommerce.BulkInsert(languageVariantProperties.ToList(),
                         options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / estimatedBatchCount);
                 });
@@ -250,7 +250,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 simplePropertyBatches.EachWithIndex((simpleProperties, index) =>
                 {
-                    context.BulkInsert(simpleProperties.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(simpleProperties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / estimatedBatchCount);
                 });
             }
@@ -274,7 +274,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 variantBatches.EachWithIndex((variants, index) =>
                 {
                     var listOfVariants = variants.ToList();
-                    context.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
+                    context.Ucommerce.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
                     insertedProducts.AddRange(listOfVariants);
                     p.Report(1.0 * index / numberOfBatches);
                 });

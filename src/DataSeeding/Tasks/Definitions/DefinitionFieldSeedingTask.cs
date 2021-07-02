@@ -64,7 +64,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     )
                 );
                 p.Report(0.5);
-                context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
             }
         }
 
@@ -77,7 +77,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 var fields = GeneratorHelper.Generate(() => GenerateField(definitionIds, dataTypeIds), Count).ToList();
                 fields.ConsecutiveSortOrder((f, v) => { f.SortOrder = (int) v; });
                 p.Report(0.5);
-                context.BulkInsert(fields);
+                context.Ucommerce.BulkInsert(fields);
                 return fields;
             }
         }

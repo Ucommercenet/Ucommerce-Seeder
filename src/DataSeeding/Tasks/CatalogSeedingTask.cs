@@ -80,7 +80,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 allowedPriceGroupBatches.EachWithIndex((allowedPriceGroups, index) =>
                 {
-                    context.BulkInsert(allowedPriceGroups.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(allowedPriceGroups.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
@@ -112,7 +112,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 propertiyBatches.EachWithIndex((properties, index) =>
                 {
-                    context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
@@ -136,7 +136,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 descriptionBatches.EachWithIndex((descriptions, index) =>
                 {
-                    context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
@@ -155,7 +155,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         .ToList();
 
                 p.Report(0.5);
-                context.BulkInsert(catalogs, options => options.SetOutputIdentity = true);
+                context.Ucommerce.BulkInsert(catalogs, options => options.SetOutputIdentity = true);
                 return catalogs;
             }
         }

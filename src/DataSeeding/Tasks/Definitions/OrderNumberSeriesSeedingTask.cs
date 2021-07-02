@@ -34,7 +34,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 var orderNumberSeries =
                     GeneratorHelper.Generate(() => _faker.Generate(), Count);
                 p.Report(0.5);
-                context.BulkInsert(orderNumberSeries);
+                context.Ucommerce.BulkInsert(orderNumberSeries);
             }
         }
     }

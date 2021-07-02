@@ -92,7 +92,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 propertyBatches.EachWithIndex((properties, index) =>
                 {
-                    context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
@@ -118,7 +118,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 descriptionBatches.EachWithIndex((descriptions, index) =>
                 {
-                    context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
@@ -141,7 +141,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 categoryBatches.EachWithIndex((categories, index) =>
                 {
                     var listOfCats = categories.ToList();
-                    context.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
+                    context.Ucommerce.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
                     insertedCategories.AddRange(listOfCats);
                     p.Report(1.0 * index / numberOfBatches);
                 });
@@ -167,7 +167,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 categoryBatches.EachWithIndex((categories, index) =>
                 {
                     var listOfCats = categories.ToList();
-                    context.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
+                    context.Ucommerce.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
                     insertedCategories.AddRange(listOfCats);
                     p.Report(1.0 * index / numberOfBatches);
                 });

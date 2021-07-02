@@ -34,7 +34,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 p.Report(0.33);
                 productDefinitions.ConsecutiveSortOrder((def, val) => { def.SortOrder = (int) val; });
                 p.Report(0.66);
-                context.BulkInsert(productDefinitions, options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(productDefinitions, options => options.SetOutputIdentity = false);
             }
 
         }

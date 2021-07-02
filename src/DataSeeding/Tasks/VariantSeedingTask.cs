@@ -77,7 +77,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 variantBatches.EachWithIndex((variants, index) =>
                 {
                     var listOfVariants = variants.ToList();
-                    context.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
+                    context.Ucommerce.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
                     insertedProducts.AddRange(listOfVariants);
                     p.Report(1.0 * index / numberOfBatches);
                 });

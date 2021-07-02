@@ -39,7 +39,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 p.Report(0.33);
                 catalogDefinitions.ConsecutiveSortOrder((f, v) => { f.SortOrder = (int) v; });
                 p.Report(0.66);
-                context.BulkInsert(catalogDefinitions.ToList(), options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(catalogDefinitions.ToList(), options => options.SetOutputIdentity = false);
             }
         }
 

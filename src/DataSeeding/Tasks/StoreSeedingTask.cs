@@ -70,7 +70,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 propertyBatches.EachWithIndex((properties, index) =>
                 {
-                    context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
@@ -91,7 +91,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                             () => GenerateStore(currencyIds, definitionIds, emailProfileIds, orderNumberSeriesIds),
                             Count).ToList();
                 p.Report(0.5);
-                context.BulkInsert(stores, options => options.SetOutputIdentity = true);
+                context.Ucommerce.BulkInsert(stores, options => options.SetOutputIdentity = true);
                 return stores;
             }
         }

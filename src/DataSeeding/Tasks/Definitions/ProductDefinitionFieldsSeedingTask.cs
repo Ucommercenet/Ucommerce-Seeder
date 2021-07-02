@@ -76,7 +76,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .ToList();
                 
                 p.Report(0.75);
-                context.BulkInsert(allFields, options => options.SetOutputIdentity = true);
+                context.Ucommerce.BulkInsert(allFields, options => options.SetOutputIdentity = true);
                 return allFields;
             }
         }
@@ -96,7 +96,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     )
                 ).ToList();
                 p.Report(0.5);
-                context.BulkInsert(descriptions, options => options.SetOutputIdentity = true);
+                context.Ucommerce.BulkInsert(descriptions, options => options.SetOutputIdentity = true);
             }
         }
 
