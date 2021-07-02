@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using Newtonsoft.Json;
-using Ucommerce.Seeder.DataSeeding;
 using Ucommerce.Seeder.DataAccess;
+using Ucommerce.Seeder.DataSeeding;
+using Ucommerce.Seeder.Models;
 
 namespace Ucommerce.Seeder
 {

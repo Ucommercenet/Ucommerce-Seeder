@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;

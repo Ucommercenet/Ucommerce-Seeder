@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 

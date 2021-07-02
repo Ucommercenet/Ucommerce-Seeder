@@ -7,6 +7,7 @@ using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
 using Ucommerce.Seeder.DataSeeding.Utilities;

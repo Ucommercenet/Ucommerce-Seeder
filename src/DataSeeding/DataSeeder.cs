@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
