@@ -12,7 +12,11 @@ namespace Ucommerce.Seeder
             CommandOption<string> connectionStringArgument = 
                 app.Option<string>("-c|--connection=<CONNECTION_STRING>", 
                     "Required: A connectionstring for the database to seed", CommandOptionType.SingleValue);
-            
+
+            CommandOption<string> ucommerceConnectionStringArgument =
+	            app.Option<string>("-u|--ucommerce-connection=<CONNECTION_STRING>",
+		            "The connectionstring used by Ucommerce when different from the CMS database", CommandOptionType.SingleOrNoValue);
+
             CommandOption<DbSizeOption> sizeArgument = 
                 app.Option<DbSizeOption>("-s|--size=<SIZE>", 
                     "The size of the database, either 'huge', 'large' or 'medium'. Default is 'huge'.", CommandOptionType.SingleOrNoValue);
@@ -31,20 +35,25 @@ namespace Ucommerce.Seeder
 
             app.OnExecute(() =>
             {
-                var connectionString = connectionStringArgument.Value();
-
-                if (string.IsNullOrWhiteSpace(connectionString))
+                var cmsConnectionString = connectionStringArgument.Value();
+                var ucommerceConnectionString = ucommerceConnectionStringArgument.Value();
+                
+                if (string.IsNullOrWhiteSpace(cmsConnectionString))
                 {
                     app.ShowHelp();
                     return 1;
                 }
+
+                if (string.IsNullOrEmpty(ucommerceConnectionString))
+                {
+	                ucommerceConnectionString = cmsConnectionString;
+                }
                 
                 DbSizeOption dbSize = sizeArgument.HasValue() ? sizeArgument.ParsedValue : DbSizeOption.Huge;
-                return new Seeder(connectionString, dbSize, verboseArgument.HasValue(), noCmsArgument.HasValue(), jsonFilePath.Value()).Run();
+                return new Seeder(cmsConnectionString, ucommerceConnectionString, dbSize, verboseArgument.HasValue(), noCmsArgument.HasValue(), jsonFilePath.Value()).Run();
             });
-
+            
             return app.Execute(args);
         }
     }
 }
-
