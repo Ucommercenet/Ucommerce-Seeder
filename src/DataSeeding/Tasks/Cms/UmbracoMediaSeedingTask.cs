@@ -50,7 +50,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
                 .RuleFor(x => x.Text, f => f.Name.JobArea());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write(
                 $"Generating {_sizeOptions.CmsMediaFolders} media folders with {_sizeOptions.CmsImagesPerFolder} images in each. ");

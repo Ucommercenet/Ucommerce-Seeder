@@ -25,7 +25,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .RuleFor(x => x.OrderNumberName, f => f.Company.CatchPhrase());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write($"Generating {Count:N0} order number series. ");
             using (var p = new ProgressBar())

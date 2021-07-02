@@ -31,13 +31,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             public string Sku { get; set; }
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var productDefinitionFields = LookupProductDefinitionFields(context, true);
-            var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
+            var priceGroupIds = context.Ucommerce.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
 
-            var productFamilyIds = context.UCommerceProduct
+            var productFamilyIds = context.Ucommerce.UCommerceProduct
                 .Where(p => p.ProductDefinition.UCommerceProductDefinitionField.Any(f =>
                     f.IsVariantProperty)) // pick families only
                 .Where(p => p.ParentProductId == null) // don't pick variants
@@ -59,7 +59,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GeneratePrices(context, priceGroupIds, products);
         }
 
-        protected IList<UCommerceProduct> GenerateVariants(UmbracoDbContext context, ProductWithDefinition[] products,
+        protected IList<UCommerceProduct> GenerateVariants(DataContext context, ProductWithDefinition[] products,
             string[] mediaIds)
         {
             uint batchSize = 100_000;

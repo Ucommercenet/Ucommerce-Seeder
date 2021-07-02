@@ -25,7 +25,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.Name, f => f.Commerce.ProductAdjective());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write($"Generating {Count:N0} product relation types. ");
             using (var p = new ProgressBar())

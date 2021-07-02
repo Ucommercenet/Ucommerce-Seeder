@@ -34,9 +34,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.ValidationExpression, f => "");
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var definitionIds = context.UCommerceDefinition
+            var definitionIds = context.Ucommerce.UCommerceDefinition
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.DataType).Select(c => c.DefinitionId)
                 .ToArray();
             var definitionFields = LookupDefinitionFields(context, definitionIds);
@@ -45,7 +45,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
             GenerateProperties(context, dataTypes, definitionFields);
         }
 
-        private void GenerateProperties(UmbracoDbContext context, IEnumerable<UCommerceDataType> dataTypes,
+        private void GenerateProperties(DataContext context, IEnumerable<UCommerceDataType> dataTypes,
             ILookup<int, DefinitionFieldEditorAndEnum> definitionFields)
         {
             Console.Write($"Generating properties for {Count:N0} data types.");
@@ -67,7 +67,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
             }
         }
 
-        private List<UCommerceDataType> GenerateDataTypes(UmbracoDbContext context, int[] definitionIds)
+        private List<UCommerceDataType> GenerateDataTypes(DataContext context, int[] definitionIds)
         {
             Console.Write($"Generating {Count:N0} data types.");
             using (var p = new ProgressBar())

@@ -22,7 +22,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f));
         }
         
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write($"Generating {Count} currencies. ");
             using (var p = new ProgressBar())
@@ -40,9 +40,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        private List<UCommerceCurrency> GetDefaultCurrenciesNotInDb(UmbracoDbContext context)
+        private List<UCommerceCurrency> GetDefaultCurrenciesNotInDb(DataContext context)
         {
-            var preSeededCurrencies = context.UCommerceCurrency.ToList();
+            var preSeededCurrencies = context.Ucommerce.UCommerceCurrency.ToList();
 
             return DefaultCurrencies.Where(x => !preSeededCurrencies
                     .Select(y => y.Isocode)

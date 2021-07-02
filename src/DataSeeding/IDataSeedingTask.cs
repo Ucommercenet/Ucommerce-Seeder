@@ -1,13 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using Ucommerce.Seeder.DataAccess;
-using Ucommerce.Seeder.Models;
+﻿using Ucommerce.Seeder.DataAccess;
 
 namespace Ucommerce.Seeder.DataSeeding
 {
     public interface IDataSeedingTask
     {
-        void Seed(UmbracoDbContext context);
+        void Seed(DataContext context);
         uint Count { get; }
     }
 }

@@ -32,7 +32,7 @@ namespace Ucommerce.Seeder.DataSeeding
             get => _count;
         }
 
-        public abstract void Seed(UmbracoDbContext context);
+        public abstract void Seed(DataContext context);
 
 
         protected IEnumerable<UCommerceEntityProperty> AddEntityProperty(Guid entityGuid,
@@ -65,9 +65,9 @@ namespace Ucommerce.Seeder.DataSeeding
             }
         }
         
-        protected ILookup<int, DefinitionFieldEditorAndEnum> LookupDefinitionFields(UmbracoDbContext context, int[] definitionIds)
+        protected ILookup<int, DefinitionFieldEditorAndEnum> LookupDefinitionFields(UcommerceDbContext context, int[] definitionIds)
         {
-            var uCommerceDefinitionFields = context.UCommerceDefinitionField
+            var uCommerceDefinitionFields = context.Ucommerce.UCommerceDefinitionField
                 .Where(field => definitionIds.Contains(field.DefinitionId));
                 
             return uCommerceDefinitionFields

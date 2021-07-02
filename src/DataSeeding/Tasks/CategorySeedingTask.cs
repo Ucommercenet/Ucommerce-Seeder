@@ -45,10 +45,10 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.RenderAsContent, f => f.Random.Bool(0.75f));
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var catalogIds = context.UCommerceProductCatalog.Select(c => c.ProductCatalogId).ToArray();
-            var definitionIds = context.UCommerceDefinition
+            var catalogIds = context.Ucommerce.UCommerceProductCatalog.Select(c => c.ProductCatalogId).ToArray();
+            var definitionIds = context.Ucommerce.UCommerceDefinition
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.Category).Select(c => c.DefinitionId)
                 .ToArray();
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
@@ -67,7 +67,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
 
-        private void GenerateProperties(UmbracoDbContext context, int[] definitionIds,
+        private void GenerateProperties(DataContext context, int[] definitionIds,
             IEnumerable<UCommerceCategory> categories,
             string[] languageCodes, string[] mediaIds)
         {
@@ -98,7 +98,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceCategory> categories,
+        private void GenerateDescriptions(DataContext context, IEnumerable<UCommerceCategory> categories,
             string[] languageCodes)
         {
             uint batchSize = 100_000;
@@ -124,7 +124,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        private List<UCommerceCategory> GenerateCategories(UmbracoDbContext context, int[] definitionIds,
+        private List<UCommerceCategory> GenerateCategories(DataContext context, int[] definitionIds,
             int[] catalogIds, string[] mediaIds)
         {
             uint batchSize = 100_000;
@@ -150,7 +150,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        private List<UCommerceCategory> GenerateSubCategories(UmbracoDbContext context,
+        private List<UCommerceCategory> GenerateSubCategories(DataContext context,
             int[] definitionIds, string[] mediaIds, IEnumerable<UCommerceCategory> topLevelCategories)
         {
             uint batchSize = 100_000;

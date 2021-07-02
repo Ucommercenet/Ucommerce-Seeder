@@ -71,14 +71,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
         protected virtual string EntityNamePlural => "products";
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var productDefinitionIds = context.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToArray();
+            var productDefinitionIds = context.Ucommerce.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToArray();
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var productDefinitionFields = LookupProductDefinitionFields(context, false);
-            var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
+            var priceGroupIds = context.Ucommerce.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
             var productRelationTypeIds =
-                context.UCommerceProductRelationType.Select(prt => prt.ProductRelationTypeId).ToArray();
+                context.Ucommerce.UCommerceProductRelationType.Select(prt => prt.ProductRelationTypeId).ToArray();
             var mediaIds = _cmsContent.GetAllMediaIds(context);
             var contentIds = _cmsContent.GetAllMediaIds(context);
 
@@ -94,7 +94,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GenerateRelations(context, products, productRelationTypeIds);
         }
 
-        private void GenerateRelations(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
+        private void GenerateRelations(DataContext context, IEnumerable<UCommerceProduct> products,
             int[] productRelationTypeIds)
         {
             Console.Write(
@@ -128,7 +128,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        protected void GeneratePrices(UmbracoDbContext context, int[] priceGroupIds,
+        protected void GeneratePrices(DataContext context, int[] priceGroupIds,
             IEnumerable<UCommerceProduct> products)
         {
             ulong totalCount = Count * (ulong) priceGroupIds.Length * _databaseSize.TiersPerPriceGroup;
@@ -185,7 +185,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        protected void GenerateDescriptions(UmbracoDbContext context,
+        protected void GenerateDescriptions(DataContext context,
             string[] languageCodes, IEnumerable<UCommerceProduct> products)
         {
             Console.Write(
@@ -207,7 +207,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        protected void GenerateProperties(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
+        protected void GenerateProperties(DataContext context, IEnumerable<UCommerceProduct> products,
             ILookup<int, ProductDefinitionFieldEditorAndEnum> productDefinitionFields, string[] mediaIds,
             string[] contentIds)
         {
@@ -222,7 +222,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
             using (var p = new ProgressBar())
             {
-                ILookup<int, int> descriptions = context.UCommerceProductDescription
+                ILookup<int, int> descriptions = context.Ucommerce.UCommerceProductDescription
                     .Select(x => new {x.ProductId, x.ProductDescriptionId})
                     .ToLookup(x => x.ProductId, x => x.ProductDescriptionId);
 
@@ -256,7 +256,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        protected List<UCommerceProduct> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
+        protected List<UCommerceProduct> GenerateProducts(DataContext context, int[] productDefinitionIds,
             string[] languageCodes, string[] mediaIds)
         {
             uint batchSize = 100_000;
@@ -284,9 +284,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         protected static ILookup<int, ProductDefinitionFieldEditorAndEnum> LookupProductDefinitionFields(
-            UmbracoDbContext context, bool variantProperties)
+            DataContext context, bool variantProperties)
         {
-            return context.UCommerceProductDefinitionField
+            return context.Ucommerce.UCommerceProductDefinitionField
                 .Where(field => field.IsVariantProperty == variantProperties)
                 .Select(field => new ProductDefinitionFieldEditorAndEnum(field, field.DataType.DefinitionName,
                     field.DataType.UCommerceDataTypeEnum.Select(x => x.Guid)))

@@ -6,8 +6,8 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Cms
 {
     public interface ICmsContent
     {
-        string[] GetAllMediaIds(UmbracoDbContext context);
-        string[] GetAllContentIds(UmbracoDbContext context);
-        string[] GetLanguageIsoCodes(UmbracoDbContext context);
+        string[] GetAllMediaIds(DataContext context);
+        string[] GetAllContentIds(DataContext context);
+        string[] GetLanguageIsoCodes(DataContext context);
     }
 }

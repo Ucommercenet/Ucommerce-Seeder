@@ -28,7 +28,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.ModifiedOn, f => f.Date.Recent());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write($"Generating {Count:N0} definitions. ");
             using (var p = new ProgressBar())

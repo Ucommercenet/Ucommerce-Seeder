@@ -26,7 +26,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.Mandatory, f => f.Random.Bool(0.1f));
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write($"Generating {Count} languages. ");
             using (var p = new ProgressBar())
