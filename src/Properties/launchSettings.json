@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Ucommerce.Faker": {
+    "Ucommerce.Seeder": {
       "commandName": "Project",
       "commandLineArgs": "-c:\"Data Source=.;Initial Catalog=umbraco852;Integrated Security=True\" -s:dev"
     }
