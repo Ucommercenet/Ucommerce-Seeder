@@ -63,9 +63,14 @@ namespace Ucommerce.Seeder
 
             seeder.Seed(() =>
             {
-                var dbContext = new UmbracoDbContext(_connectionString, _verbose);
-                dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                return dbContext;
+                var umbracoDbContext = new UmbracoDbContext(_cmsConnectionString, _verbose);
+                var ucommerceDbContext = new UcommerceDbContext(_ucommerceConnectionString, _verbose);
+
+                umbracoDbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+                ucommerceDbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
+                var dataContext = new DataContext(ucommerceDbContext, umbracoDbContext);
+                return dataContext;
             });
 
             return 0;
