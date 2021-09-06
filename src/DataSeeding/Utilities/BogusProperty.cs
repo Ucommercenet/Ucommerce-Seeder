@@ -47,7 +47,7 @@ namespace Ucommerce.Seeder.DataSeeding.Utilities
                 {
                     BuiltInEditors.EnumMultiSelect,
                     (mediaGuids, contentGuids, enumGuids) => String.Join("|", _faker
-                        .PickRandom(enumGuids, _faker.Random.Int(0, Math.Min(5, enumGuids.Count()))))
+                        .PickRandom(enumGuids, _faker.Random.Int(0, Math.Min(enumGuids.Count(), 5))))
                 },
             };
 
