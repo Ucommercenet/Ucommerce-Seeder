@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
@@ -32,9 +33,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.ModifiedOn, f => f.Date.Recent());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var definitionIds = context.UCommerceDefinition
+            var definitionIds = context.Ucommerce.UCommerceDefinition
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.CatalogGroup).Select(c => c.DefinitionId)
                 .ToArray();
 
@@ -43,7 +44,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GenerateProperties(context, definitionIds, stores);
         }
 
-        private void GenerateProperties(UmbracoDbContext context, int[] definitionIds,
+        private void GenerateProperties(DataContext context, int[] definitionIds,
             IEnumerable<UCommerceProductCatalogGroup> stores)
         {
             Console.Write($"Generating properties for {Count:N0} stores. ");
@@ -69,20 +70,20 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 propertyBatches.EachWithIndex((properties, index) =>
                 {
-                    context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        private List<UCommerceProductCatalogGroup> GenerateStores(UmbracoDbContext context, int[] definitionIds)
+        private List<UCommerceProductCatalogGroup> GenerateStores(DataContext context, int[] definitionIds)
         {
             Console.Write($"Generating {Count:N0} stores. ");
             using (var p = new ProgressBar())
             {
-                var emailProfileIds = context.UCommerceEmailProfile.Select(x => x.EmailProfileId).ToArray();
-                var currencyIds = context.UCommerceCurrency.Select(c => c.CurrencyId).ToArray();
-                var orderNumberSeriesIds = context.UCommerceOrderNumberSerie.Select(c => c.OrderNumberId).ToArray();
+                var emailProfileIds = context.Ucommerce.UCommerceEmailProfile.Select(x => x.EmailProfileId).ToArray();
+                var currencyIds = context.Ucommerce.UCommerceCurrency.Select(c => c.CurrencyId).ToArray();
+                var orderNumberSeriesIds = context.Ucommerce.UCommerceOrderNumberSerie.Select(c => c.OrderNumberId).ToArray();
                 p.Report(0.1);
                 var stores =
                     GeneratorHelper
@@ -90,7 +91,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                             () => GenerateStore(currencyIds, definitionIds, emailProfileIds, orderNumberSeriesIds),
                             Count).ToList();
                 p.Report(0.5);
-                context.BulkInsert(stores, options => options.SetOutputIdentity = true);
+                context.Ucommerce.BulkInsert(stores, options => options.SetOutputIdentity = true);
                 return stores;
             }
         }

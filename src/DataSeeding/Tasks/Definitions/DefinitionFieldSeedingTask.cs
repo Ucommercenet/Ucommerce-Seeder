@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -38,17 +39,17 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.DisplayName, f => f.Lorem.Word());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var definitionIds = context.UCommerceDefinition.Select(x => x.DefinitionId).ToArray();
-            var dataTypeIds = context.UCommerceDataType.Select(x => x.DataTypeId).ToArray();
+            var definitionIds = context.Ucommerce.UCommerceDefinition.Select(x => x.DefinitionId).ToArray();
+            var dataTypeIds = context.Ucommerce.UCommerceDataType.Select(x => x.DataTypeId).ToArray();
 
             var fields = GenerateFields(context, definitionIds, dataTypeIds);
 
             GenerateDescriptions(context, fields);
         }
 
-        private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceDefinitionField> fields)
+        private void GenerateDescriptions(DataContext context, IEnumerable<UCommerceDefinitionField> fields)
         {
             Console.Write($"Generating descriptions for {Count:N0} definition fields. ");
             using (var p = new ProgressBar())
@@ -63,11 +64,11 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     )
                 );
                 p.Report(0.5);
-                context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
             }
         }
 
-        private List<UCommerceDefinitionField> GenerateFields(UmbracoDbContext context, int[] definitionIds,
+        private List<UCommerceDefinitionField> GenerateFields(DataContext context, int[] definitionIds,
             int[] dataTypeIds)
         {
             Console.Write($"Generating {Count:N0} definition fields. ");
@@ -76,7 +77,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 var fields = GeneratorHelper.Generate(() => GenerateField(definitionIds, dataTypeIds), Count).ToList();
                 fields.ConsecutiveSortOrder((f, v) => { f.SortOrder = (int) v; });
                 p.Report(0.5);
-                context.BulkInsert(fields);
+                context.Ucommerce.BulkInsert(fields);
                 return fields;
             }
         }

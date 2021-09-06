@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
@@ -25,13 +26,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.Mandatory, f => f.Random.Bool(0.1f));
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write($"Generating {Count} languages. ");
             using (var p = new ProgressBar())
             {
                 var availableCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
-                    .Where(cultureInfo => !context.UmbracoLanguage
+                    .Where(cultureInfo => !context.Cms.UmbracoLanguage
                         .Any(language => language.LanguageIsocode == cultureInfo.Name))
                     .ToArray();
 
@@ -39,7 +40,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 var umbracoLanguages = GeneratorHelper.Generate(Generate, Count).Where(x => x != null).ToList();
                 p.Report(0.5);
-                context.BulkInsert(umbracoLanguages, options => options.SetOutputIdentity = false);
+                context.Cms.BulkInsert(umbracoLanguages, options => options.SetOutputIdentity = false);
             }
         }
 

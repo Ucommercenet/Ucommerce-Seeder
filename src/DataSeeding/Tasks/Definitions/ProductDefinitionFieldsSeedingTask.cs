@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -36,22 +37,22 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.DisplayName, f => f.Lorem.Word());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             var fields = GenerateDefinitionFields(context);
             GenerateFieldDescriptions(context, fields);
         }
 
 
-        private List<UCommerceProductDefinitionField> GenerateDefinitionFields(UmbracoDbContext context)
+        private List<UCommerceProductDefinitionField> GenerateDefinitionFields(DataContext context)
         {
             Console.Write($"Generating {Count:N0} product definition fields. ");
             using (var p = new ProgressBar())
             {
-                var dataTypeIds = context.UCommerceDataType.Select(x => x.DataTypeId).ToArray();
+                var dataTypeIds = context.Ucommerce.UCommerceDataType.Select(x => x.DataTypeId).ToArray();
 
                 var allProductDefinitionIds =
-                    context.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToList();
+                    context.Ucommerce.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToList();
                 var oneHalfProductDefinitionIds =
                     allProductDefinitionIds.Take(allProductDefinitionIds.Count / 2).ToList();
                 var oneHalfProductFamiliyDefinitionIds =
@@ -75,12 +76,12 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .ToList();
                 
                 p.Report(0.75);
-                context.BulkInsert(allFields, options => options.SetOutputIdentity = true);
+                context.Ucommerce.BulkInsert(allFields, options => options.SetOutputIdentity = true);
                 return allFields;
             }
         }
 
-        private void GenerateFieldDescriptions(UmbracoDbContext context, IEnumerable<UCommerceProductDefinitionField> fields)
+        private void GenerateFieldDescriptions(DataContext context, IEnumerable<UCommerceProductDefinitionField> fields)
         {
             Console.Write($"Generating descriptions for {fields.Count():N0} product definition fields. ");
             using (var p = new ProgressBar())
@@ -95,7 +96,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     )
                 ).ToList();
                 p.Report(0.5);
-                context.BulkInsert(descriptions, options => options.SetOutputIdentity = true);
+                context.Ucommerce.BulkInsert(descriptions, options => options.SetOutputIdentity = true);
             }
         }
 

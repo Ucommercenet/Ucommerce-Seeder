@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -33,9 +34,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 .RuleFor(x => x.ValidationExpression, f => "");
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var definitionIds = context.UCommerceDefinition
+            var definitionIds = context.Ucommerce.UCommerceDefinition
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.DataType).Select(c => c.DefinitionId)
                 .ToArray();
             var definitionFields = LookupDefinitionFields(context, definitionIds);
@@ -44,7 +45,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
             GenerateProperties(context, dataTypes, definitionFields);
         }
 
-        private void GenerateProperties(UmbracoDbContext context, IEnumerable<UCommerceDataType> dataTypes,
+        private void GenerateProperties(DataContext context, IEnumerable<UCommerceDataType> dataTypes,
             ILookup<int, DefinitionFieldEditorAndEnum> definitionFields)
         {
             Console.Write($"Generating properties for {Count:N0} data types.");
@@ -62,18 +63,18 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .ToArray();
 
                 p.Report(0.5);
-                context.BulkInsert(properties, options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(properties, options => options.SetOutputIdentity = false);
             }
         }
 
-        private List<UCommerceDataType> GenerateDataTypes(UmbracoDbContext context, int[] definitionIds)
+        private List<UCommerceDataType> GenerateDataTypes(DataContext context, int[] definitionIds)
         {
             Console.Write($"Generating {Count:N0} data types.");
             using (var p = new ProgressBar())
             {
                 var dataTypes = GeneratorHelper.Generate(() => Generate(definitionIds), Count).ToList();
                 p.Report(0.5);
-                context.BulkInsert(dataTypes);
+                context.Ucommerce.BulkInsert(dataTypes);
                 return dataTypes;
             }
         }

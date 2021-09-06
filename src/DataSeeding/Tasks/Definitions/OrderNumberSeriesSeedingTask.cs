@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
@@ -24,7 +25,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                     .RuleFor(x => x.OrderNumberName, f => f.Company.CatchPhrase());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write($"Generating {Count:N0} order number series. ");
             using (var p = new ProgressBar())
@@ -33,7 +34,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks.Definitions
                 var orderNumberSeries =
                     GeneratorHelper.Generate(() => _faker.Generate(), Count);
                 p.Report(0.5);
-                context.BulkInsert(orderNumberSeries);
+                context.Ucommerce.BulkInsert(orderNumberSeries);
             }
         }
     }

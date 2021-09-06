@@ -6,6 +6,7 @@ using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
@@ -44,10 +45,10 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.RenderAsContent, f => f.Random.Bool(0.75f));
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var catalogIds = context.UCommerceProductCatalog.Select(c => c.ProductCatalogId).ToArray();
-            var definitionIds = context.UCommerceDefinition
+            var catalogIds = context.Ucommerce.UCommerceProductCatalog.Select(c => c.ProductCatalogId).ToArray();
+            var definitionIds = context.Ucommerce.UCommerceDefinition
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.Category).Select(c => c.DefinitionId)
                 .ToArray();
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
@@ -66,7 +67,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
 
-        private void GenerateProperties(UmbracoDbContext context, int[] definitionIds,
+        private void GenerateProperties(DataContext context, int[] definitionIds,
             IEnumerable<UCommerceCategory> categories,
             string[] languageCodes, string[] mediaIds)
         {
@@ -91,13 +92,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 propertyBatches.EachWithIndex((properties, index) =>
                 {
-                    context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceCategory> categories,
+        private void GenerateDescriptions(DataContext context, IEnumerable<UCommerceCategory> categories,
             string[] languageCodes)
         {
             uint batchSize = 100_000;
@@ -117,13 +118,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 descriptionBatches.EachWithIndex((descriptions, index) =>
                 {
-                    context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        private List<UCommerceCategory> GenerateCategories(UmbracoDbContext context, int[] definitionIds,
+        private List<UCommerceCategory> GenerateCategories(DataContext context, int[] definitionIds,
             int[] catalogIds, string[] mediaIds)
         {
             uint batchSize = 100_000;
@@ -140,7 +141,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 categoryBatches.EachWithIndex((categories, index) =>
                 {
                     var listOfCats = categories.ToList();
-                    context.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
+                    context.Ucommerce.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
                     insertedCategories.AddRange(listOfCats);
                     p.Report(1.0 * index / numberOfBatches);
                 });
@@ -149,7 +150,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        private List<UCommerceCategory> GenerateSubCategories(UmbracoDbContext context,
+        private List<UCommerceCategory> GenerateSubCategories(DataContext context,
             int[] definitionIds, string[] mediaIds, IEnumerable<UCommerceCategory> topLevelCategories)
         {
             uint batchSize = 100_000;
@@ -166,7 +167,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 categoryBatches.EachWithIndex((categories, index) =>
                 {
                     var listOfCats = categories.ToList();
-                    context.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
+                    context.Ucommerce.BulkInsert(listOfCats, options => options.SetOutputIdentity = true);
                     insertedCategories.AddRange(listOfCats);
                     p.Report(1.0 * index / numberOfBatches);
                 });

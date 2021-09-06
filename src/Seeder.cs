@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding;
 using Ucommerce.Seeder.Models;
 
@@ -11,14 +9,16 @@ namespace Ucommerce.Seeder
 {
     public class Seeder
     {
-        private readonly string _connectionString;
+        private readonly string _cmsConnectionString;
+        private readonly string _ucommerceConnectionString;
         private readonly bool _verbose;
         private readonly bool _excludeCmsTables;
         private readonly DatabaseSize _dbSize;
 
-        public Seeder(string connectionString, DbSizeOption dbSize, bool verbose, bool excludeCmsTables, string useJsonDbSizePath)
+        public Seeder(string cmsConnectionString, string ucommerceConnectionString, DbSizeOption dbSize, bool verbose, bool excludeCmsTables, string useJsonDbSizePath)
         {
-            _connectionString = connectionString;
+	        _cmsConnectionString = cmsConnectionString;
+            _ucommerceConnectionString = ucommerceConnectionString;
             _verbose = verbose;
             _excludeCmsTables = excludeCmsTables;
 
@@ -63,9 +63,14 @@ namespace Ucommerce.Seeder
 
             seeder.Seed(() =>
             {
-                var dbContext = new UmbracoDbContext(_connectionString, _verbose);
-                dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                return dbContext;
+                var umbracoDbContext = new UmbracoDbContext(_cmsConnectionString, _verbose);
+                var ucommerceDbContext = new UcommerceDbContext(_ucommerceConnectionString, _verbose);
+
+                umbracoDbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+                ucommerceDbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
+                var dataContext = new DataContext(ucommerceDbContext, umbracoDbContext);
+                return dataContext;
             });
 
             return 0;

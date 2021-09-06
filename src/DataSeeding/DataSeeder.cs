@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
@@ -28,12 +29,12 @@ namespace Ucommerce.Seeder.DataSeeding
         // If the truncate option has been specified, the tasks will truncate each their tables
         // in reverse seeding order.
         //
-        public void Seed(Func<UmbracoDbContext> dbContextFactory)
+        public void Seed(Func<DataContext> dataContextFactory)
         {
             var masterStopwatch = new Stopwatch();
             masterStopwatch.Start();
 
-            using (var context = dbContextFactory())
+            using (var context = dataContextFactory())
             {
                 // For now, only Umbraco is supported.
                 // You can disable Umbraco media seeding

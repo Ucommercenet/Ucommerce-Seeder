@@ -7,6 +7,7 @@ using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Tasks.Definitions;
 using Ucommerce.Seeder.DataSeeding.Utilities;
@@ -41,14 +42,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.DisplayName, f => f.Commerce.ProductName());
         }
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var definitionIds = context.UCommerceDefinition
+            var definitionIds = context.Ucommerce.UCommerceDefinition
                 .Where(d => d.DefinitionTypeId == (int) DefinitionType.Catalog).Select(c => c.DefinitionId)
                 .ToArray();
 
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
-            var priceGroupIds = context.UCommercePriceGroup.Select(x => x.PriceGroupId).ToArray();
+            var priceGroupIds = context.Ucommerce.UCommercePriceGroup.Select(x => x.PriceGroupId).ToArray();
 
             var catalogs = GenerateCatalogs(context, definitionIds, priceGroupIds);
             GenerateDescriptions(context, catalogs, languageCodes);
@@ -56,7 +57,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GenerateAllowedPriceGroups(context, catalogs, priceGroupIds);
         }
 
-        private void GenerateAllowedPriceGroups(UmbracoDbContext context, IEnumerable<UCommerceProductCatalog> catalogs,
+        private void GenerateAllowedPriceGroups(DataContext context, IEnumerable<UCommerceProductCatalog> catalogs,
             int[] priceGroupIds)
         {
             Console.Write($"Generating allowed price groups for {Count:N0} catalogs. ");
@@ -79,13 +80,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 allowedPriceGroupBatches.EachWithIndex((allowedPriceGroups, index) =>
                 {
-                    context.BulkInsert(allowedPriceGroups.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(allowedPriceGroups.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        private void GenerateProperties(UmbracoDbContext context, int[] definitionIds,
+        private void GenerateProperties(DataContext context, int[] definitionIds,
             IEnumerable<UCommerceProductCatalog> catalogs,
             string[] languageCodes)
         {
@@ -111,13 +112,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 propertiyBatches.EachWithIndex((properties, index) =>
                 {
-                    context.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(properties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        private void GenerateDescriptions(UmbracoDbContext context, IEnumerable<UCommerceProductCatalog> catalogs,
+        private void GenerateDescriptions(DataContext context, IEnumerable<UCommerceProductCatalog> catalogs,
             string[] languageCodes)
         {
             Console.Write(
@@ -135,26 +136,26 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 descriptionBatches.EachWithIndex((descriptions, index) =>
                 {
-                    context.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(descriptions.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        private List<UCommerceProductCatalog> GenerateCatalogs(UmbracoDbContext context, int[] definitionIds,
+        private List<UCommerceProductCatalog> GenerateCatalogs(DataContext context, int[] definitionIds,
             int[] priceGroupIds)
         {
             Console.Write($"Generating {Count:N0} catalogs. ");
             using (var p = new ProgressBar())
             {
-                var storeIds = context.UCommerceProductCatalogGroup.Select(c => c.ProductCatalogGroupId).ToArray();
+                var storeIds = context.Ucommerce.UCommerceProductCatalogGroup.Select(c => c.ProductCatalogGroupId).ToArray();
                 var catalogs =
                     GeneratorHelper.Generate(() => GenerateCatalog(definitionIds, storeIds, priceGroupIds), Count)
                         .DistinctBy(a => a.UniqueIndex())
                         .ToList();
 
                 p.Report(0.5);
-                context.BulkInsert(catalogs, options => options.SetOutputIdentity = true);
+                context.Ucommerce.BulkInsert(catalogs, options => options.SetOutputIdentity = true);
                 return catalogs;
             }
         }

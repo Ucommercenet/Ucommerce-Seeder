@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
 
@@ -21,7 +22,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 .RuleFor(x => x.Deleted, f => f.Random.Bool(0.001f));
         }
         
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
             Console.Write($"Generating {Count} currencies. ");
             using (var p = new ProgressBar())
@@ -35,13 +36,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         .DistinctBy(x => x.Isocode);
 
                 p.Report(0.5);
-                context.BulkInsert(currencies.ToList(), options => options.SetOutputIdentity = false);
+                context.Ucommerce.BulkInsert(currencies.ToList(), options => options.SetOutputIdentity = false);
             }
         }
 
-        private List<UCommerceCurrency> GetDefaultCurrenciesNotInDb(UmbracoDbContext context)
+        private List<UCommerceCurrency> GetDefaultCurrenciesNotInDb(DataContext context)
         {
-            var preSeededCurrencies = context.UCommerceCurrency.ToList();
+            var preSeededCurrencies = context.Ucommerce.UCommerceCurrency.ToList();
 
             return DefaultCurrencies.Where(x => !preSeededCurrencies
                     .Select(y => y.Isocode)

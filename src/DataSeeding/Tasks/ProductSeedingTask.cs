@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using EFCore.BulkExtensions;
+using Ucommerce.Seeder.DataAccess;
 using Ucommerce.Seeder.DataSeeding.Tasks.Cms;
 using Ucommerce.Seeder.DataSeeding.Utilities;
 using Ucommerce.Seeder.Models;
@@ -70,14 +71,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
         protected virtual string EntityNamePlural => "products";
 
-        public override void Seed(UmbracoDbContext context)
+        public override void Seed(DataContext context)
         {
-            var productDefinitionIds = context.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToArray();
+            var productDefinitionIds = context.Ucommerce.UCommerceProductDefinition.Select(x => x.ProductDefinitionId).ToArray();
             var languageCodes = _cmsContent.GetLanguageIsoCodes(context);
             var productDefinitionFields = LookupProductDefinitionFields(context, false);
-            var priceGroupIds = context.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
+            var priceGroupIds = context.Ucommerce.UCommercePriceGroup.Select(pg => pg.PriceGroupId).ToArray();
             var productRelationTypeIds =
-                context.UCommerceProductRelationType.Select(prt => prt.ProductRelationTypeId).ToArray();
+                context.Ucommerce.UCommerceProductRelationType.Select(prt => prt.ProductRelationTypeId).ToArray();
             var mediaIds = _cmsContent.GetAllMediaIds(context);
             var contentIds = _cmsContent.GetAllMediaIds(context);
 
@@ -93,7 +94,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             GenerateRelations(context, products, productRelationTypeIds);
         }
 
-        private void GenerateRelations(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
+        private void GenerateRelations(DataContext context, IEnumerable<UCommerceProduct> products,
             int[] productRelationTypeIds)
         {
             Console.Write(
@@ -121,13 +122,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 relationBatches.EachWithIndex((relations, index) =>
                 {
-                    context.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(relations.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / numberOfBatches);
                 });
             }
         }
 
-        protected void GeneratePrices(UmbracoDbContext context, int[] priceGroupIds,
+        protected void GeneratePrices(DataContext context, int[] priceGroupIds,
             IEnumerable<UCommerceProduct> products)
         {
             ulong totalCount = Count * (ulong) priceGroupIds.Length * _databaseSize.TiersPerPriceGroup;
@@ -159,7 +160,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 foreach (var batch in priceBatches.Zip(productBatches, (prices, moreInfo) => new {prices, moreInfo}))
                 {
                     var prices = batch.prices.ToList();
-                    context.BulkInsert(prices,
+                    context.Ucommerce.BulkInsert(prices,
                         options => options.SetOutputIdentity = true );
 
                     p.Report(1.0 * ++batchCount / numBatches);
@@ -169,7 +170,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                         GenerateProductPrice(zippedBatch.price.PriceId, zippedBatch.product.Product.ProductId,
                             zippedBatch.product.Tier)).ToArray();
 
-                    context.BulkInsert(productPrices,
+                    context.Ucommerce.BulkInsert(productPrices,
                         options =>
                         {
                             options.SetOutputIdentity = false;
@@ -184,7 +185,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
             }
         }
 
-        protected void GenerateDescriptions(UmbracoDbContext context,
+        protected void GenerateDescriptions(DataContext context,
             string[] languageCodes, IEnumerable<UCommerceProduct> products)
         {
             Console.Write(
@@ -199,14 +200,14 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 descriptionBatches.EachWithIndex((descriptions, index) =>
                     {
-                        context.BulkInsert(descriptions.ToList(), p => p.SetOutputIdentity = false);
+                        context.Ucommerce.BulkInsert(descriptions.ToList(), p => p.SetOutputIdentity = false);
                         p.Report(1.0 * index / estimatedBatchCount);
                     }
                 );
             }
         }
 
-        protected void GenerateProperties(UmbracoDbContext context, IEnumerable<UCommerceProduct> products,
+        protected void GenerateProperties(DataContext context, IEnumerable<UCommerceProduct> products,
             ILookup<int, ProductDefinitionFieldEditorAndEnum> productDefinitionFields, string[] mediaIds,
             string[] contentIds)
         {
@@ -221,7 +222,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
             using (var p = new ProgressBar())
             {
-                ILookup<int, int> descriptions = context.UCommerceProductDescription
+                ILookup<int, int> descriptions = context.Ucommerce.UCommerceProductDescription
                     .Select(x => new {x.ProductId, x.ProductDescriptionId})
                     .ToLookup(x => x.ProductId, x => x.ProductDescriptionId);
 
@@ -232,7 +233,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 languageVariantPropertyBatches.EachWithIndex((languageVariantProperties, index) =>
                 {
-                    context.BulkInsert(languageVariantProperties.ToList(),
+                    context.Ucommerce.BulkInsert(languageVariantProperties.ToList(),
                         options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / estimatedBatchCount);
                 });
@@ -249,13 +250,13 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
 
                 simplePropertyBatches.EachWithIndex((simpleProperties, index) =>
                 {
-                    context.BulkInsert(simpleProperties.ToList(), options => options.SetOutputIdentity = false);
+                    context.Ucommerce.BulkInsert(simpleProperties.ToList(), options => options.SetOutputIdentity = false);
                     p.Report(1.0 * index / estimatedBatchCount);
                 });
             }
         }
 
-        protected List<UCommerceProduct> GenerateProducts(UmbracoDbContext context, int[] productDefinitionIds,
+        protected List<UCommerceProduct> GenerateProducts(DataContext context, int[] productDefinitionIds,
             string[] languageCodes, string[] mediaIds)
         {
             uint batchSize = 100_000;
@@ -273,7 +274,7 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
                 variantBatches.EachWithIndex((variants, index) =>
                 {
                     var listOfVariants = variants.ToList();
-                    context.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
+                    context.Ucommerce.BulkInsert(listOfVariants, options => options.SetOutputIdentity = true);
                     insertedProducts.AddRange(listOfVariants);
                     p.Report(1.0 * index / numberOfBatches);
                 });
@@ -283,9 +284,9 @@ namespace Ucommerce.Seeder.DataSeeding.Tasks
         }
 
         protected static ILookup<int, ProductDefinitionFieldEditorAndEnum> LookupProductDefinitionFields(
-            UmbracoDbContext context, bool variantProperties)
+            DataContext context, bool variantProperties)
         {
-            return context.UCommerceProductDefinitionField
+            return context.Ucommerce.UCommerceProductDefinitionField
                 .Where(field => field.IsVariantProperty == variantProperties)
                 .Select(field => new ProductDefinitionFieldEditorAndEnum(field, field.DataType.DefinitionName,
                     field.DataType.UCommerceDataTypeEnum.Select(x => x.Guid)))
