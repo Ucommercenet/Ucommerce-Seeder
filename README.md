@@ -130,6 +130,8 @@ Size can be `medium`, `large` or `huge`. I know, there's no "small" option; the 
 
 
 ### Other options
+ 
+ -u or --ucommerce-connection for specifying a Ucommerce connection string, in case Ucommerce has been installed into a separate DB from the CMS. If this option is not provided, the '-c' connection string will be used for both.
 
 -v or --verbose for detailed logging
 
