@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Reflection;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Ucommerce.Seeder
@@ -19,7 +21,7 @@ namespace Ucommerce.Seeder
 
             CommandOption<DbSizeOption> sizeArgument = 
                 app.Option<DbSizeOption>("-s|--size=<SIZE>", 
-                    "The size of the database, either 'huge', 'large' or 'medium'. Default is 'huge'.", CommandOptionType.SingleOrNoValue);
+                    $"The size of the database, the options are {typeof(DbSizeOption).GetMembers(BindingFlags.Public | BindingFlags.Static).Select(x => x.Name).ToArray().Aggregate("\n", (current, s) => current + s + "\n")}Default is '{DbSizeOption.Huge.ToString()}'.", CommandOptionType.SingleOrNoValue);
 
             CommandOption<bool> verboseArgument = 
                 app.Option<bool>("-v|--verbose", 
